@@ -1,5 +1,7 @@
 import psycopg2
+import json
 from config import host, user, password, db_name
+
 
 
 try:
@@ -17,10 +19,14 @@ try:
     
     with connection.cursor() as cursor:
         cursor.execute(
-            "select * from test"
+            "select json_agg(test) from test"
         )
-        
-        print(f"test: {", ".join(cursor.fetchone())}")
+        #resp = json.loads(cursor.fetchone())
+        #resp = cursor.fetchone()
+        resp = cursor.fetchone()
+        print(resp)
+        for i in resp[0]:
+            print(f'name: {i["fisrst_name"]}, last name: {i["last_name"]}')
         
     # create a new table
     # with connection.cursor() as cursor:
