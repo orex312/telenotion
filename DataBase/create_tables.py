@@ -9,7 +9,7 @@ def create_tables(connection):
         cursor.execute(
             '''
                 CREATE TABLE IF NOT EXISTS Users (
-                    "user_id" int NOT NULL,
+                    "user_id" BIGSERIAL NOT NULL,
                     "user_name" varchar(50) NOT NULL,
                     "login" varchar(50) NOT NULL,
                     "creatad_at" date NOT NULL DEFAULT '1.1.2000',
@@ -18,7 +18,7 @@ def create_tables(connection):
                 );
 
                 CREATE TABLE IF NOT EXISTS Tasks(
-                    "task_id" int NOT NULL,
+                    "task_id" BIGSERIAL NOT NULL,
                     "user_id" int NOT NULL,
                     "title" varchar(50) NOT NULL,
                     "description" varchar(250),
@@ -33,7 +33,7 @@ def create_tables(connection):
                 );
 
                 CREATE TABLE IF NOT EXISTS Reminders (
-                    "reminder_id" int NOT NULL,
+                    "reminder_id" BIGSERIAL NOT NULL,
                     "task_id" int NOT NULL,
                     "remind_at" timestamp NOT NULL,
                     "sent" bool DEFAULT False,

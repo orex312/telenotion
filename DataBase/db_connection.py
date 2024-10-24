@@ -18,8 +18,8 @@ def malke_connection():
         return connection
     except Exception as _ex:
         print("[INFO] Error while working with PostgreSQL", _ex)
-    finally:
+    '''finally:
         if connection:
             # cursor.close()
             connection.close()
-            print("[INFO] PostgreSQL connection closed")
+            print("[INFO] PostgreSQL connection closed")'''
