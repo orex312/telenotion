@@ -4,16 +4,7 @@ from config import host, user, password, db_name
 
 
 
-try:
-    # connect to exist database
-    connection = psycopg2.connect(
-        host=host,
-        user=user,
-        password=password,
-        database=db_name    
-    )
-    connection.autocommit = True
-  
+def create_tables(connection):
     with connection.cursor() as cursor:
         cursor.execute(
             '''
@@ -50,11 +41,3 @@ try:
                     FOREIGN KEY(task_id) REFERENCES Tasks(task_id) ON DELETE CASCADE
                 );'''
         )
-
-except Exception as _ex:
-    print("[INFO] Error while working with PostgreSQL", _ex)
-finally:
-    if connection:
-        # cursor.close()
-        connection.close()
-        print("[INFO] PostgreSQL connection closed")
