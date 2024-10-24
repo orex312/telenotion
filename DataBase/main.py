@@ -1,5 +1,5 @@
 from connection import Connection
-from DataBase.user_operations import *
+from user_operations import *
 
 user_name = "Alex"
 user_login = "Apelsin312"
