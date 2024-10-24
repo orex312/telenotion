@@ -1,5 +1,5 @@
 import psycopg2
-from db_connection import malke_connection
+from connection import Connection
 
-conn = malke_connection()
+conn = Connection().connect
 print("All done!")
