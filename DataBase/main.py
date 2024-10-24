@@ -1,8 +1,8 @@
 from connection import Connection
-from DataBase.user_operations import *
+from user_operations import *
 
-user_name = "Alex"
-user_login = "Apelsin312"
+user_name = "Ilya"
+user_login = "Pipiska"
 
 # Добавить нового юзера
 resp = addNewUser(user_login, user_name)
