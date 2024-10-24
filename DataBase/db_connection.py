@@ -1,5 +1,4 @@
 import psycopg2
-import json
 from config import host, user, password, db_name
 
 
