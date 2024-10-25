@@ -10,8 +10,8 @@ description = "Dopustin tak"
 
 # Добавить нового юзера
 resp = addNewUser(user_login, user_name)
-if resp:
-    print(resp)
+#if resp:
+#    print(resp)
 '''
 # Список всех юзеров
 resp = getAllUsers()
@@ -35,12 +35,12 @@ for i in resp:
 resp = getTasksByUser(user_login)
 print(resp)
 for i in resp:
-    print(f'title - {i['title']} \decription - {i['description']} \ due_date - {i['due_date']}')
+    print(f'title - {i['title']} \ decription - {i['description']} \ due_date - {i['due_date']}')
     t1 = getSubTasks(i['task_id'])
     if t1:
         print(f'    SubTasks of {i['title']}:')
         for j in t1:
-            print(f'    title - {j['title']} \decription - {j['description']} \ due_date - {j['due_date']}')
+            print(f'    title - {j['title']} \ decription - {j['description']} \ due_date - {j['due_date']}')
 
 
 
