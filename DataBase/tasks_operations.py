@@ -37,11 +37,46 @@ try:
             response = cursor.fetchall()
             return response[0][0]
         
+    def getTasksById(task_id):
+        with connect.cursor() as cursor:
+            query = '''SELECT json_agg(Tasks) FROM Tasks
+                        WHERE task_id = %s'''
+            cursor.execute(query,[task_id])
+            response = cursor.fetchall()
+            return response[0][0]
+        
     def delTask(task_id):
         with connect.cursor() as cursor:
             query = '''DELETE FROM Tasks
                         WHERE task_id = %s'''
             cursor.execute(query,[task_id])
+            response = cursor.fetchall()
+            return response[0][0]
+    
+    def updateTaskTitle(task_id, title):
+        with connect.cursor() as cursor:
+            query = '''UPDATE Tasks
+                        SET title = %s
+                        WHERE task_id = %s'''
+            cursor.execute(query,[title, task_id])
+            response = cursor.fetchall()
+            return response[0][0]
+
+    def updateTaskDescription(task_id, description):
+        with connect.cursor() as cursor:
+            query = '''UPDATE Tasks
+                        SET description = %s
+                        WHERE task_id = %s'''
+            cursor.execute(query,[description, task_id])
+            response = cursor.fetchall()
+            return response[0][0]
+    
+    def updateTaskDate(task_id, date):
+        with connect.cursor() as cursor:
+            query = '''UPDATE Tasks
+                        SET due_date = %s
+                        WHERE task_id = %s'''
+            cursor.execute(query,[date, task_id])
             response = cursor.fetchall()
             return response[0][0]
 
