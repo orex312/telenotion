@@ -3,7 +3,7 @@ from datetime import date
 
 connect = Connection().connect
 try:
-    def addNewUser(login, name):
+    def addNewTask(login, name):
         with connect.cursor() as cursor:
             query = '''SELECT * FROM Users
                         WHERE login = %s'''
@@ -38,4 +38,4 @@ try:
             return response[0][0]
 
 except Exception as _ex:
-        print("[INFO][user_operations] Error while working with PostgreSQL", _ex)
+        print("[INFO][tasks_operations] Error while working with PostgreSQL", _ex)
