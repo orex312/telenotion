@@ -79,7 +79,7 @@ try:
                         WHERE task_id = %s'''
             cursor.execute(query,[title, description, due_date, status, priority, creatad_at, parent_id, task_id])
             response = cursor.fetchall()
-            return response[0][0]
+            return None
 # Обновить заголовок
     def updateTaskTitle(task_id, title):
         with connect.cursor() as cursor:
@@ -88,7 +88,7 @@ try:
                         WHERE task_id = %s'''
             cursor.execute(query,[title, task_id])
             response = cursor.fetchall()
-            return response[0][0]
+            return None
 
 # Обновить описание
     def updateTaskDescription(task_id, description):
@@ -98,7 +98,7 @@ try:
                         WHERE task_id = %s'''
             cursor.execute(query,[description, task_id])
             response = cursor.fetchall()
-            return response[0][0]
+            return None
 
 # Обновить деделайн    
     def updateTaskDate(task_id, date):
@@ -108,7 +108,7 @@ try:
                         WHERE task_id = %s'''
             cursor.execute(query,[date, task_id])
             response = cursor.fetchall()
-            return response[0][0]
+            return None
 
 except Exception as _ex:
         print("[INFO][tasks_operations] Error while working with PostgreSQL", _ex)

@@ -1,6 +1,7 @@
 from connection import Connection
 from user_operations import *
 from tasks_operations import *
+from state_operations import *
 
 user_name = "Alex"
 user_login = "Apelsin312"
@@ -32,15 +33,10 @@ for i in resp:
 #if resp:
 #    print(resp)
 
-resp = getTasksByUser(user_login)
+resp = getUserStateByLogin(user_login)
 #print(resp)
 for i in resp:
-    print(f'title - {i['title']} | decription - {i['description']} | due_date - {i['due_date']}')
-    t1 = getSubTasks(i['task_id'])
-    if t1:
-        print(f'    SubTasks of {i['title']}:')
-        for j in t1:
-            print(f'    title - {j['title']} | decription - {j['description']} | due_date - {j['due_date']}')
+    print(i)
 
 
 
