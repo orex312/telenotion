@@ -23,7 +23,7 @@ def create_tables(connection):
                     "title" varchar(50) NOT NULL,
                     "description" varchar(250),
                     "due_date" date,
-                    "status" varchar(20),
+                    "status" varchar(20) DEFAULT 'Open',
                     "priority" varchar(250),
                     "creatad_at" date NOT NULL DEFAULT '1.1.2000',
                     "parent_id" int REFERENCES Tasks(task_id),
