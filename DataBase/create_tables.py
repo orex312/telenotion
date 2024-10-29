@@ -39,5 +39,14 @@ def create_tables(connection):
                     "sent" bool DEFAULT False,
                     PRIMARY KEY (reminder_id),
                     FOREIGN KEY(task_id) REFERENCES Tasks(task_id) ON DELETE CASCADE
+                );
+
+                CREATE TABLE IF NOT EXISTS User_State (
+                    "user_id" BIGSERIAL NOT NULL,
+                    "curent_step" varchar(20) DEFAULT 'Main_Menu',
+                    "context" varchar(250),
+                    "last_updated" timestamp,
+                    PRIMARY KEY (user_id),
+                    FOREIGN KEY(user_id) REFERENCES Users(user_id) ON DELETE CASCADE
                 );'''
         )
