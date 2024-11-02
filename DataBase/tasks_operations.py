@@ -1,15 +1,13 @@
 from connection import Connection
 from datetime import date
+from user_operations import *
 
 connect = Connection().connect
 try:
     # Создание новой таски
     def addNewTask(login, title, descryption = '', due_date = None, status = "open", priority = 1, parent_id = None):
         with connect.cursor() as cursor:
-            query = '''SELECT user_id FROM Users
-                    WHERE login = %s'''
-            cursor.execute(query,[login])
-            user_id = cursor.fetchall()[0]
+            user_id = getUserByLogin(login)[0]["user_id"]
             if not user_id:
                 return "Error: user not exist"
             
@@ -33,10 +31,7 @@ try:
 # Получить атску по юзеру    
     def getTasksByUser(login):
         with connect.cursor() as cursor:
-            query = '''SELECT user_id FROM Users
-                    WHERE login = %s'''
-            cursor.execute(query,[login])
-            user_id = cursor.fetchall()[0]
+            user_id = getUserByLogin(login)[0]["user_id"]
             if not user_id:
                 return 'Error: user not exist'
             query = '''SELECT json_agg(Tasks) FROM Tasks
