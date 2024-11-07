@@ -38,4 +38,4 @@ try:
             return response[0][0]
 
 except Exception as _ex:
-        print("[INFO][basic_operations] Error while working with PostgreSQL", _ex)
+        print("[INFO][user_operations] Error while working with PostgreSQL", _ex)
