@@ -2,8 +2,10 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardBu
 
 menu = [
     [InlineKeyboardButton(text="Start", callback_data="\start")],
-    [InlineKeyboardButton(text="Добавить пользователя", callback_data="generate_text")]
-
+    [InlineKeyboardButton(text="Добавить пользователя", callback_data="generate_text")],
+    [InlineKeyboardButton(text="Список задач", callback_data="generate_text")],
+    [InlineKeyboardButton(text="Новая задача", callback_data="generate_text")],
+    [InlineKeyboardButton(text="Что-нибудь еще", callback_data="generate_text")]
 ]
 
 menu = InlineKeyboardMarkup(inline_keyboard=menu)
