@@ -1,0 +1,94 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/24.7.17 Chrome/128.0.6613.36 Electron/32.0.1 Safari/537.36" version="24.7.17">
+  <diagram name="Страница — 1" id="q5T17Cgvx8EAALclAEJn">
+    <mxGraphModel dx="2795" dy="1598" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="a_DnK-zIp28bXrul3QrD-5" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="a_DnK-zIp28bXrul3QrD-2" target="a_DnK-zIp28bXrul3QrD-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-2" value="Неизвестная команда" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="440" y="390" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-4" value="&quot;message_reply2&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;unknown&quot;&lt;/span&gt;&lt;div&gt;&lt;code&gt;message.reply(...)&lt;/code&gt;&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="590" y="390" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-6" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="a_DnK-zIp28bXrul3QrD-7" target="a_DnK-zIp28bXrul3QrD-8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-7" value="Help" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="440" y="310" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-8" value="&quot;message_help&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;&quot;&lt;/span&gt;&lt;div&gt;&lt;code&gt;message.answer(...)&lt;/code&gt;&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;&lt;br&gt;&lt;/span&gt;&lt;/div&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="590" y="310" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-9" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="a_DnK-zIp28bXrul3QrD-10" target="a_DnK-zIp28bXrul3QrD-11" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-10" value="&lt;div&gt;Показать список заметок&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="20" y="190" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-11" value="&quot;&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;&quot;&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="170" y="190" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-12" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="a_DnK-zIp28bXrul3QrD-13" target="a_DnK-zIp28bXrul3QrD-14" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-13" value="Создать заметку" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="20" y="270" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-14" value="&quot;&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;&quot;&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="170" y="270" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-15" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="a_DnK-zIp28bXrul3QrD-16" target="a_DnK-zIp28bXrul3QrD-17" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-16" value="Изменить заметку" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="20" y="350" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-17" value="&quot;&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;&quot;&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="170" y="350" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-18" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="a_DnK-zIp28bXrul3QrD-19" target="a_DnK-zIp28bXrul3QrD-20" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-19" value="&lt;div&gt;Создать заметку&lt;br&gt;&lt;/div&gt;" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="20" y="430" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-20" value="&quot;&lt;span style=&quot;text-align: left; background-color: initial;&quot;&gt;&quot;&lt;/span&gt;" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="170" y="430" width="200" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-22" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=90;" parent="1" vertex="1">
+          <mxGeometry x="171.25" y="-56.25" width="50" height="372.5" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-25" value="Команды взаимодействия с БД" style="whiteSpace=wrap;html=1;align=center;strokeWidth=2;pointerEvents=1;" parent="1" vertex="1">
+          <mxGeometry x="133.75" y="40" width="125" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-28" value="" style="strokeWidth=2;html=1;shape=mxgraph.flowchart.annotation_2;align=left;labelPosition=right;pointerEvents=1;rotation=90;" parent="1" vertex="1">
+          <mxGeometry x="593.75" y="-66.25" width="50" height="392.5" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-29" value="Команды бота" style="whiteSpace=wrap;html=1;align=center;strokeWidth=2;pointerEvents=1;" parent="1" vertex="1">
+          <mxGeometry x="556.25" y="40" width="125" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-31" value="&lt;span style=&quot;color: rgb(240, 240, 240); font-family: Helvetica; font-size: 12px; font-style: normal; font-variant-ligatures: normal; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: center; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(27, 29, 30); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;&quot;&gt;Показать список заметок&lt;/span&gt;" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="880" y="40" width="720" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-32" value="Создать заметку" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="1680" y="40" width="720" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-33" value="Изменить заметку" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="2520" y="40" width="720" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-34" value="Создать заметку" style="whiteSpace=wrap;html=1;rounded=1;" parent="1" vertex="1">
+          <mxGeometry x="3350" y="40" width="720" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-38" value="check_ID" style="shape=process;whiteSpace=wrap;html=1;backgroundOutline=1;" parent="1" vertex="1">
+          <mxGeometry x="970" y="370" width="170" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="a_DnK-zIp28bXrul3QrD-40" value="&lt;div style=&quot;&quot;&gt;По ID пользователя ищем в общей таблице все задачи этого пользователя, проверяя иерархию&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;align=left;" parent="1" vertex="1">
+          <mxGeometry x="920" y="150" width="210" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

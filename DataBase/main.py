@@ -3,8 +3,8 @@ from user_operations import *
 from tasks_operations import *
 from state_operations import *
 
-user_name = "Alex"
-user_login = "Apelsin312"
+user_name = "Ilya"
+user_login = "Pipiska"
 
 title = "Test"
 description = "Dopustin tak"
