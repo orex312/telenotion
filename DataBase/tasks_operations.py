@@ -5,15 +5,20 @@ from user_operations import *
 connect = Connection().connect
 try:
     # Создание новой таски
-    def addNewTask(login, title, descryption = '', due_date = None, status = "open", priority = 1, parent_id = None):
+    def addNewTask(user_id, title, descryption = '', due_date = None, status = "open", priority = 1, parent_id = None):
         with connect.cursor() as cursor:
-            user_id = getUserByLogin(login)[0]["user_id"]
-            if not user_id:
-                return "Error: user not exist"
-            
-            query = '''INSERT INTO Tasks (user_id, title, description, due_date, status, priority, creatad_at, parent_id)
-                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s)'''
-            cursor.execute(query, [user_id, title, descryption, due_date, status, priority, date.today(), parent_id])
+            query = '''select max(task_id) from tasks'''
+            cursor.execute(query)
+            task_id = cursor.fetchall()[0][0]
+            print(task_id)
+            if task_id == None:
+                task_id = 1
+            else:
+                task_id += 1
+            query = '''INSERT INTO Tasks (task_id, user_id, title, description, due_date, status, priority, creatad_at, parent_id)
+                        VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
+            cursor.execute(query, [task_id, user_id, title, descryption, due_date, status, priority, date.today(), parent_id])
+            return task_id
 
 #---------------------------------------------------------------
 
@@ -29,11 +34,8 @@ try:
 #-----------------------Получение тасок-------------------------
     
 # Получить атску по юзеру    
-    def getTasksByUser(login):
+    def getTasksByUser(user_id):
         with connect.cursor() as cursor:
-            user_id = getUserByLogin(login)[0]["user_id"]
-            if not user_id:
-                return 'Error: user not exist'
             query = '''SELECT json_agg(Tasks) FROM Tasks
                     WHERE user_id = %s
                     AND parent_id is null'''
@@ -92,7 +94,6 @@ try:
                         SET description = %s
                         WHERE task_id = %s'''
             cursor.execute(query,[description, task_id])
-            response = cursor.fetchall()
             return None
 
 # Обновить деделайн    
