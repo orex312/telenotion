@@ -28,8 +28,7 @@ try:
             query = '''DELETE FROM Tasks
                         WHERE task_id = %s'''
             cursor.execute(query,[task_id])
-            response = cursor.fetchall()
-            return response[0][0]
+            return 0
     
 #-----------------------Получение тасок-------------------------
     
