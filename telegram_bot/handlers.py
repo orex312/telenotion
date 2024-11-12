@@ -18,7 +18,7 @@ import text
 router = Router()
 
 @router.message(Command("help"))
-async def message_handler(msg: Message):
+async def help_handler(msg: Message):
     addNewUser (str(msg.from_user.id), str(msg.from_user.username))
     await msg.answer(
 """Команды:
@@ -44,7 +44,7 @@ async def start_handler(msg: Message):
     await msg.answer(text.greet.format(name=msg.from_user.full_name), reply_markup=kb.menu)
 
 @router.message(Command("del"))
-async def message_to_any (msg:Message):
+async def del_handler (msg:Message):
     user_id = addNewUser(str(msg.from_user.id), str(msg.from_user.username))
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
@@ -75,7 +75,7 @@ async def message_handler(msg: Message):
     await msg.answer(f"{msg.text}")
 
 @router.message(Command("show"))
-async def message_handler(msg: Message):
+async def show_handler(msg: Message):
     user_id = addNewUser(str(msg.from_user.id), str(msg.from_user.username))
     updateUserState(user_id, step = "showAll")
     text = msg.text.split()
@@ -96,7 +96,7 @@ async def message_handler(msg: Message):
             updateUserState(user_id, "task", resp[0]['task_id'])
 
 @router.message()
-async def message_test(msg: Message):
+async def message_handler(msg: Message):
     user_id = addNewUser (str(msg.from_user.id), str(msg.from_user.username))
     user_state = getUserState(user_id)
     print(user_state, msg.text)
