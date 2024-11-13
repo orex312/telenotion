@@ -12,49 +12,23 @@ import text
 
 router = Router()
 
-
-
-@router.message(Command("Хто_я"))
+@router.message(Command("start"))
 async def message_test(msg: Message):
     addNewUser (str(msg.from_user.id), str(msg.from_user.username))
     resp = getUserByLogin (str(msg.from_user.id)) [0]
-    await msg.answer(resp["user_name"])
+    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=kb.main_menu)
 
 
 @router.message()
-async def message_test(msg: Message):
+async def my_tasks(msg: Message):
     addNewUser (str(msg.from_user.id), str(msg.from_user.username))
     resp = getUserByLogin (str(msg.from_user.id)) [0]
-    await msg.answer(str(resp["user_id"]))
-    await msg.answer(resp["user_name"])
+    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=kb.new_tasks_menu)
 
 
 
-
-
-
-
-
-
-
-
-@router.message(Command("start"))
+@router.message()
 async def start_handler(msg: Message):
-    await msg.answer(text.greet.format(name=msg.from_user.full_name), reply_markup=kb.menu)
-
-@router.message(Command("qwe"))
-async def message_to_any (msg:Message):
-    await msg.answer ("Неизвестная комманда\n")
-
-@router.message(Command("rty"))
-async def message_handler(msg: Message):
-    await msg.answer(f"{msg.text}")
+    await msg.answer("Неизвестная комманда")
 
 
-@router.message(F.text == "Меню")
-@router.message(F.text == "Выйти в меню")
-@router.message(F.text == "◀️ Выйти в меню")
-# @router.message()
-
-async def menu(msg: Message):
-    await msg.answer(text.menu, reply_markup=kb.menu)

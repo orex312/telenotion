@@ -9,10 +9,12 @@ Babel==2.9.1
 certifi==2024.2.2
 charset-normalizer==3.3.2
 config==0.5.1
+emoji==2.14.0
 frozenlist==1.4.1
 idna==3.7
 magic-filter==1.0.12
 multidict==6.0.5
+psycopg2-binary==2.9.10
 pydantic==2.7.1
 pydantic_core==2.18.2
 pytz==2024.1
