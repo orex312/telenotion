@@ -1,5 +1,7 @@
 import os
 import sys
+from aiogram.types import CallbackQuery
+
 from logic.task import taskCreating, taskShows, showTask # type: ignore
 sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 
@@ -16,6 +18,34 @@ import kb
 import text
 
 router = Router()
+
+
+@router.message(Command("kb"))
+async def message_test(msg: Message):
+    addNewUser (str(msg.from_user.id), str(msg.from_user.username))
+    resp = getUserByLogin (str(msg.from_user.id)) [0]
+    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=kb.main_menu)
+
+@router.message(Command("start"))
+async def start_handler(msg: Message):
+    await msg.answer(text.greet.format(name=msg.from_user.full_name), reply_markup=kb.main_menu)
+
+
+
+
+
+@router.callback_query (F.data == "new_task")
+async def test (call: CallbackQuery):
+    msg = call.message
+    user_id = addNewUser(str(msg.from_user.id), str(msg.from_user.username))
+    print(user_id)
+    updateUserState(user_id, step = "createTask")
+    await msg.answer("Введи название задачи")
+
+
+
+
+
 
 @router.message(Command("help"))
 async def help_handler(msg: Message):
@@ -39,9 +69,7 @@ async def task_handler(msg: Message):
     updateUserState(user_id, step = "createTask")
     await msg.answer("Введи название задачи")
 
-@router.message(Command("start"))
-async def start_handler(msg: Message):
-    await msg.answer(text.greet.format(name=msg.from_user.full_name), reply_markup=kb.menu)
+
 
 @router.message(Command("del"))
 async def del_handler (msg:Message):
