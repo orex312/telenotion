@@ -1,18 +1,27 @@
 from connection import Connection
-from datetime import date
+from datetime import date, datetime
 
 connect = Connection().connect
 try:
     def addNewUser(login, name):
         with connect.cursor() as cursor:
-            query = '''SELECT * FROM Users
+            query = '''SELECT user_id FROM Users
                         WHERE login = %s'''
             cursor.execute(query, [login])
-            if cursor.fetchall():
-                return "user with this login already exist"
+            response = cursor.fetchall()
+            if response:
+                return response[0][0]
             query = '''INSERT INTO Users (login, user_name, creatad_at)
                         VALUES (%s,%s,%s)'''
             cursor.execute(query, [login, name, date.today()])
+            query = '''SELECT user_id FROM Users
+                        WHERE login = %s'''
+            cursor.execute(query, [login])
+            response = cursor.fetchall()
+            query = '''INSERT INTO User_State (user_id, last_updated)
+                        VALUES (%s,%s)'''
+            cursor.execute(query, [response[0][0], datetime.now()])
+            return response[0][0]
 
     def getAllUsers():
         with connect.cursor() as cursor:
