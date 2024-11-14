@@ -9,7 +9,7 @@ sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 from aiogram import types, F, Router
 from aiogram.types import Message
 from aiogram.filters import Command
-from user_operations import addNewUser, getUserByLogin # type: ignore 
+from user_operations import addNewUser, getUserByLogin, getUserIdByName # type: ignore 
 from state_operations import addUserState, getUserStateByLogin, getUserState, updateUserState # type: ignore
 from tasks_operations import getTasksByUser, getTasksById, delTask # type: ignore
 
@@ -39,9 +39,26 @@ async def start_handler(msg: Message):
 
 @router.callback_query (F.data == "new_task")
 async def test (call: CallbackQuery):
-    msg = call.answer
-    user_id = addNewUser(str(msg.from_user.id), str(msg.from_user.username))
+    msg = call.message
+    user_id = getUserIdByName(msg.chat.username)
+    #print(user_id)
+    updateUserState(user_id, step = "createTask")
+    await msg.answer("Введи название задачи")
 
+@router.callback_query (F.data == "show_tasks")
+async def test (call: CallbackQuery):
+    msg = call.message
+    user_id = getUserIdByName(msg.chat.username)
+    #print(user_id)
+    updateUserState(user_id, step = "showAll")
+    resp = getTasksByUser(user_id)
+    if not resp:
+        await msg.answer ("Нет задач\n")
+        return 0
+    for task in resp:
+        await msg.answer(f'Номер-{task['task_id']}\nНазвание: {task['title']}\nОписание: {task['description']}')
+    if len(resp) == 1:
+        updateUserState(user_id, "task", resp[0]['task_id'])
 
 
 

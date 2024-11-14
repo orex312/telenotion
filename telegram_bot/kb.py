@@ -4,7 +4,7 @@ import handlers
 
 # Главное меню пользователя
 main_menu = [
-    [InlineKeyboardButton(text="Список задач", callback_data="my_tasks")],
+    [InlineKeyboardButton(text="Список задач", callback_data="show_tasks")],
     [InlineKeyboardButton(text="Новая задача", callback_data="new_task")],
     [InlineKeyboardButton(text="Редактировать профиль", callback_data="change_profile")]
 ]
