@@ -30,7 +30,7 @@ async def help_handler(msg: Message):
 async def message_test(msg: Message):
     addNewUser (str(msg.from_user.id), str(msg.from_user.username))
     resp = getUserByLogin (str(msg.from_user.id)) [0]
-    await msg.answer(resp["user_name"])
+    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=kb.main_menu)
 
 @router.message(Command("task"))
 async def task_handler(msg: Message):
@@ -117,10 +117,3 @@ async def message_handler(msg: Message):
             await msg.answer(resp["user_name"])
 
 
-@router.message(F.text == "Меню")
-@router.message(F.text == "Выйти в меню")
-@router.message(F.text == "◀️ Выйти в меню")
-# @router.message()
-
-async def menu(msg: Message):
-    await msg.answer(text.menu, reply_markup=kb.menu)
