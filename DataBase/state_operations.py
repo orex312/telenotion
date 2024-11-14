@@ -21,18 +21,18 @@ try:
                         WHERE user_id = %s'''
             cursor.execute(query, [id])
             response = cursor.fetchall()
-            return response[0][0]
+            return response[0][0][0]
         
     def getUserStateByLogin(login):
         id = getUserByLogin(login)[0]["user_id"]
         return getUserState(id)
         
-    def updateUserState(id, step, context = ""):
+    def updateUserState(id, step = "main_menu", context = None):
         with connect.cursor() as cursor:
             query = '''UPDATE User_State
                         SET curent_step = %s,
-                        SET context = %s,
-                        SET last_updated = %s
+                        context = %s,
+                        last_updated = %s
                         WHERE user_id = %s'''
             cursor.execute(query,[step, context, datetime.now(), id])
             return None
