@@ -21,7 +21,7 @@ try:
                         WHERE user_id = %s'''
             cursor.execute(query, [id])
             response = cursor.fetchall()
-            return response[0][0]
+            return response[0][0][0]
         
     def getUserStateByLogin(login):
         id = getUserByLogin(login)[0]["user_id"]

@@ -38,6 +38,14 @@ try:
             response = cursor.fetchall()
             return response[0][0]
         
+    def getUserIdByName(user_name):
+        with connect.cursor() as cursor:
+            query = '''SELECT user_id FROM Users
+                    WHERE user_name = %s'''
+            cursor.execute(query,[user_name])
+            response = cursor.fetchall()
+            return response[0][0]
+        
     def getUserById(id):
         with connect.cursor() as cursor:
             query = '''SELECT json_agg(Users) FROM Users
