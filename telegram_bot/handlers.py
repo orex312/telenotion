@@ -26,6 +26,9 @@ async def message_test(msg: Message):
     resp = getUserByLogin (str(msg.from_user.id)) [0]
     await msg.answer(text.main_menu(resp["user_name"]), reply_markup=kb.main_menu)
 
+
+
+
 @router.message(Command("start"))
 async def start_handler(msg: Message):
     await msg.answer(text.greet.format(name=msg.from_user.full_name), reply_markup=kb.main_menu)
@@ -36,11 +39,9 @@ async def start_handler(msg: Message):
 
 @router.callback_query (F.data == "new_task")
 async def test (call: CallbackQuery):
-    msg = call.message
+    msg = call.answer
     user_id = addNewUser(str(msg.from_user.id), str(msg.from_user.username))
-    print(user_id)
-    updateUserState(user_id, step = "createTask")
-    await msg.answer("Введи название задачи")
+
 
 
 
