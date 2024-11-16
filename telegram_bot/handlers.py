@@ -10,7 +10,7 @@ sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 from aiogram import types, F, Router
 from aiogram.types import Message
 from aiogram.filters import Command
-from user_operations import addNewUser, getUserByLogin, getUserIdByName # type: ignore 
+from user_operations import addNewUser, getUserByLogin, getUserIdByName, getUserById # type: ignore 
 from state_operations import addUserState, getUserStateByLogin, getUserState, updateUserState # type: ignore
 from tasks_operations import getTasksByUser, getTasksById, delTask # type: ignore
 
@@ -31,12 +31,13 @@ async def message_test(msg: Message):
     await msg.answer(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
 
 @router.callback_query (F.data == "kb")
-async def message_test(msg: Message):
-    user_id = addNewUser (str(msg.from_user.id), str(msg.from_user.username))
+async def message_test(call: CallbackQuery):
+    msg = call.message
+    user_id = getUserIdByName(call.message.chat.username)
     updateUserState(user_id, step = "main_menu")
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
-    resp = getUserByLogin (str(msg.from_user.id)) [0]
+    resp = getUserById (user_id) [0]
     await msg.answer(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
 
 @router.message(Command("start"))
@@ -57,9 +58,9 @@ async def test (call: CallbackQuery):
 async def test (call: CallbackQuery):
     msg = call.message
     user_id = getUserIdByName(msg.chat.username)
+    updateUserState(user_id, step = "createTask")
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
-    updateUserState(user_id, step = "createTask")
     await msg.answer("Введи название задачи",reply_markup=but_builder(step))
 
 @router.callback_query (F.data == "show_tasks")
