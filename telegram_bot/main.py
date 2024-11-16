@@ -19,7 +19,7 @@ def read_data (sFile_data):
 	read_token = pFile_data.readline ()
 	return read_token
 
-API_TOKEN = read_data ("../bot_info.txt")
+API_TOKEN = read_data ("bot_info.txt")
 
 
 
