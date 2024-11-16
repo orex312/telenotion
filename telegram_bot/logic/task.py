@@ -37,13 +37,15 @@ def taskCreating(user_id, context, msg):
     #print(user_id, context)
     #print(msg)
     if not context:
-        task_id = addNewTask(user_id, msg)
+        task_id = addNewTask(user_id, str(msg))
         updateUserState(user_id, step = "createTask", context = f"title {task_id}")
         return "Введи описание задачи"
     context = context.split()
     match context[0]:
         case "title":
             updateTaskDescription(context[1], msg)
+            return '\n'.join(["Готово",showTask(user_id, context[1])])
+        case _ :
             return '\n'.join(["Готово",showTask(user_id, context[1])])
 
 

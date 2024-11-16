@@ -28,7 +28,7 @@ async def message_test(msg: Message):
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
     resp = getUserByLogin (str(msg.from_user.id)) [0]
-    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
+    await msg.edit_text(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
 
 @router.callback_query (F.data == "kb")
 async def message_test(call: CallbackQuery):
@@ -38,11 +38,17 @@ async def message_test(call: CallbackQuery):
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
     resp = getUserById (user_id) [0]
-    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
+    await msg.edit_text(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
 
 @router.message(Command("start"))
 async def start_handler(msg: Message):
-    await msg.answer(text.greet.format(name=msg.from_user.full_name), reply_markup=kb.main_menu)
+    user_id = addNewUser(str(msg.from_user.id), str(msg.from_user.username))
+    print(user_id)
+    updateUserState(user_id, step = "main_menu")
+    user_state = getUserState(user_id)
+    step = user_state["curent_step"]
+    resp = getUserById (user_id) [0]
+    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
 
 @router.callback_query (F.data.startswith('task_'))
 async def test (call: CallbackQuery):
@@ -52,7 +58,24 @@ async def test (call: CallbackQuery):
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
     task = getTasksById(task_id)[0]
-    await call.message.answer(f'Название: {task['title']}\nОписание: {task['description']}', reply_markup=but_builder(step))
+    await call.message.edit_text(f'Название: {task['title']}\nОписание: {task['description']}', reply_markup=but_builder(step))
+
+@router.callback_query (F.data == "del")
+async def message_test(call: CallbackQuery):
+    msg = call.message
+    user_id = getUserIdByName(call.message.chat.username)
+    user_state = getUserState(user_id)
+    step = user_state["curent_step"]
+    context = user_state["context"]
+    task_id = context.split()[1]
+    resp = getTasksById(task_id)
+    if not resp or (resp[0]['user_id'] != user_id):
+        await msg.edit_text ("Введен номер несуществующей задачи\n", reply_markup=but_builder('main_menu'))
+        return 'Введен номер несуществующей задачи'
+    delTask(task_id)
+    updateUserState(user_id, step = "main_menu")
+    await msg.edit_text ("Задача удалена\n", reply_markup=but_builder('main_menu'))
+    
 
 @router.callback_query (F.data == "new_task")
 async def test (call: CallbackQuery):
@@ -61,7 +84,7 @@ async def test (call: CallbackQuery):
     updateUserState(user_id, step = "createTask")
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
-    await msg.answer("Введи название задачи",reply_markup=but_builder(step))
+    await msg.edit_text("Введи название задачи",reply_markup=but_builder(step))
 
 @router.callback_query (F.data == "show_tasks")
 async def test (call: CallbackQuery):
@@ -71,10 +94,10 @@ async def test (call: CallbackQuery):
     updateUserState(user_id, step = "showAll")
     resp = getTasksByUser(user_id)
     if not resp:
-        await msg.answer ("Нет задач\n")
+        await msg.edit_text ("Нет задач\n")
         return 0
     for task in resp:
-        await msg.answer(f'Номер-{task['task_id']}\nНазвание: {task['title']}\nОписание: {task['description']}')
+        await msg.edit_text(f'Номер-{task['task_id']}\nНазвание: {task['title']}\nОписание: {task['description']}')
     if len(resp) == 1:
         updateUserState(user_id, "task", resp[0]['task_id'])
 
@@ -87,7 +110,10 @@ async def test (call: CallbackQuery):
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
     resp = getTasksByUser(user_id)
-    await msg.answer("Твои задачи:",reply_markup=but_builder(step,resp))
+    if resp:
+        await msg.edit_text("Твои задачи:",reply_markup=but_builder(step,resp=resp))
+    else:
+        await msg.edit_text("Список задач пуст😊",reply_markup=but_builder(step,resp=resp))
 
 
 
@@ -131,7 +157,7 @@ async def del_handler (msg:Message):
             await msg.answer ("Введен номер несуществующей задачи\n")
             return 'Введен номер несуществующей задачи'
         delTask(text[1])
-        await msg.answer ("Задача удалена\n")
+        await msg.edianswert_text ("Задача удалена\n")
     elif len(text) == 1:
         if step == 'task' and context:
             resp = getTasksById(context)[0]
@@ -171,13 +197,15 @@ async def show_handler(msg: Message):
 async def message_handler(msg: Message):
     user_id = addNewUser (str(msg.from_user.id), str(msg.from_user.username))
     user_state = getUserState(user_id)
-    print(user_state, msg.text)
     step = user_state["curent_step"]
     context = user_state["context"]
     match step:
         case "createTask":
             text = taskCreating(user_id, context, msg.text)
-            if text: await msg.answer(text,reply_markup=but_builder(step))
+            user_state = getUserState(user_id)
+            step = user_state["curent_step"]
+            context = user_state["context"]
+            if text: await msg.answer(text,reply_markup=but_builder(step, context=context))
 
         case "showAll":
             text = taskShows(user_id, context, msg.text)
