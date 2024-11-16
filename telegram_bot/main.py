@@ -14,15 +14,15 @@ from aiogram.fsm.storage.memory import MemoryStorage # -- хранилища д�
 from handlers import router # type: ignore 
 
 
-# def read_data (sFile_data):
-# 	global API_TOKEN
-# 	pFile_data = open (sFile_data, "r")
-# 	API_TOKEN = pFile_data.readline ()
-# 	return 0
-# read_data ("data.txt")
+def read_data (sFile_data):
+	pFile_data = open (sFile_data, "r")
+	read_token = pFile_data.readline ()
+	return read_token
 
-# Удалено чтение токена из файла, пока хз почему не работает
-API_TOKEN = '7767052229:AAGcy1tK09SyCAXXz17Uso41WSYQqD-RxRM'
+API_TOKEN = read_data ("../bot_info.txt")
+
+
+
 
 
 async def main():
