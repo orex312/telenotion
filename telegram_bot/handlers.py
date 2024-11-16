@@ -1,6 +1,7 @@
 import os
 import sys
 from aiogram.types import CallbackQuery
+from battons.button_builder import but_builder
 
 from logic.task import taskCreating, taskShows, showTask # type: ignore
 sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
@@ -20,27 +21,46 @@ import text
 router = Router()
 
 
-@router.message(Command("kb"))
+@router.message(F.text.in_({"/kb","Меню"}))
 async def message_test(msg: Message):
-    addNewUser (str(msg.from_user.id), str(msg.from_user.username))
+    user_id = addNewUser (str(msg.from_user.id), str(msg.from_user.username))
+    updateUserState(user_id, step = "main_menu")
+    user_state = getUserState(user_id)
+    step = user_state["curent_step"]
     resp = getUserByLogin (str(msg.from_user.id)) [0]
-    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=kb.main_menu)
+    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
+
+@router.callback_query (F.data == "kb")
+async def message_test(msg: Message):
+    user_id = addNewUser (str(msg.from_user.id), str(msg.from_user.username))
+    updateUserState(user_id, step = "main_menu")
+    user_state = getUserState(user_id)
+    step = user_state["curent_step"]
+    resp = getUserByLogin (str(msg.from_user.id)) [0]
+    await msg.answer(text.main_menu(resp["user_name"]), reply_markup=but_builder(step))
 
 @router.message(Command("start"))
 async def start_handler(msg: Message):
     await msg.answer(text.greet.format(name=msg.from_user.full_name), reply_markup=kb.main_menu)
 
-
-
-
+@router.callback_query (F.data.startswith('task_'))
+async def test (call: CallbackQuery):
+    task_id = call.data.split("_")[1]
+    user_id = getUserIdByName(call.message.chat.username)
+    updateUserState(user_id, step = "task", context = "show "+ str(task_id))
+    user_state = getUserState(user_id)
+    step = user_state["curent_step"]
+    task = getTasksById(task_id)[0]
+    await call.message.answer(f'Название: {task['title']}\nОписание: {task['description']}', reply_markup=but_builder(step))
 
 @router.callback_query (F.data == "new_task")
 async def test (call: CallbackQuery):
     msg = call.message
     user_id = getUserIdByName(msg.chat.username)
-    #print(user_id)
+    user_state = getUserState(user_id)
+    step = user_state["curent_step"]
     updateUserState(user_id, step = "createTask")
-    await msg.answer("Введи название задачи")
+    await msg.answer("Введи название задачи",reply_markup=but_builder(step))
 
 @router.callback_query (F.data == "show_tasks")
 async def test (call: CallbackQuery):
@@ -58,7 +78,15 @@ async def test (call: CallbackQuery):
         updateUserState(user_id, "task", resp[0]['task_id'])
 
 
-
+@router.callback_query (F.data == "show")
+async def test (call: CallbackQuery):
+    msg = call.message
+    user_id = getUserIdByName(msg.chat.username)
+    updateUserState(user_id, step = "showAll")
+    user_state = getUserState(user_id)
+    step = user_state["curent_step"]
+    resp = getTasksByUser(user_id)
+    await msg.answer("Твои задачи:",reply_markup=but_builder(step,resp))
 
 
 
@@ -148,7 +176,7 @@ async def message_handler(msg: Message):
     match step:
         case "createTask":
             text = taskCreating(user_id, context, msg.text)
-            if text: await msg.answer(text)
+            if text: await msg.answer(text,reply_markup=but_builder(step))
 
         case "showAll":
             text = taskShows(user_id, context, msg.text)
