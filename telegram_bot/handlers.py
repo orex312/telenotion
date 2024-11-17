@@ -12,7 +12,7 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from user_operations import addNewUser, getUserByLogin, getUserIdByName, getUserById # type: ignore 
 from state_operations import addUserState, getUserStateByLogin, getUserState, updateUserState # type: ignore
-from tasks_operations import getTasksByUser, getTasksById, delTask # type: ignore
+from tasks_operations import getTasksByUser, getTasksById, delTask, updateTaskDate # type: ignore
 
 
 import kb
@@ -58,7 +58,37 @@ async def test (call: CallbackQuery):
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
     task = getTasksById(task_id)[0]
-    await call.message.edit_text(f'Название: {task['title']}\nОписание: {task['description']}', reply_markup=but_builder(step))
+    if task['description']:
+        await call.message.edit_text(f'Название: {task['title']}\nОписание: {task['description']}',\
+                                  reply_markup=but_builder(step))
+    else:
+        await call.message.edit_text(f'Название: {task['title']}',\
+                                  reply_markup=but_builder(step))
+
+@router.callback_query (F.data.startswith('taskOk_'))
+async def test (call: CallbackQuery):
+    task_id = call.data.split("_")[1]
+    user_id = getUserIdByName(call.message.chat.username)
+    user_state = getUserState(user_id)
+    updateTaskDate(task_id, "done")
+    await call.answer("Задача помечена как сделанная")
+
+@router.callback_query (F.data.startswith('del_'))
+async def test (call: CallbackQuery):
+    task_id = call.data.split("_")[1]
+    user_id = getUserIdByName(call.message.chat.username)
+    step = getUserState(user_id)
+    resp = getTasksById(task_id)
+    if not resp or (resp[0]['user_id'] != user_id):
+        await call.answer("Введен номер несуществующей задачи")
+        return 'Введен номер несуществующей задачи'
+    delTask(task_id)
+    await call.answer("Задача удалена")
+    resp = getTasksByUser(user_id)
+    if resp:
+        await call.message.edit_text("Твои задачи:",reply_markup=but_builder(step,resp=resp))
+    else:
+        await call.message.edit_text("Список задач пуст😊",reply_markup=but_builder(step,resp=resp))
 
 @router.callback_query (F.data == "del")
 async def message_test(call: CallbackQuery):
@@ -102,18 +132,24 @@ async def test (call: CallbackQuery):
         updateUserState(user_id, "task", resp[0]['task_id'])
 
 
-@router.callback_query (F.data == "show")
+@router.callback_query (F.data.startswith('show'))
 async def test (call: CallbackQuery):
     msg = call.message
+    show = call.data.split("_")
+    if len(show) > 1:
+        rng = int(show[1])
+    else:
+        rng = 1
+    print(rng)
     user_id = getUserIdByName(msg.chat.username)
     updateUserState(user_id, step = "showAll")
     user_state = getUserState(user_id)
     step = user_state["curent_step"]
     resp = getTasksByUser(user_id)
     if resp:
-        await msg.edit_text("Твои задачи:",reply_markup=but_builder(step,resp=resp))
+        await msg.edit_text("Твои задачи:",reply_markup=but_builder(step,resp=resp,rng=rng))
     else:
-        await msg.edit_text("Список задач пуст😊",reply_markup=but_builder(step,resp=resp))
+        await msg.edit_text("Список задач пуст😊",reply_markup=but_builder(step,resp=resp,rng=rng))
 
 
 

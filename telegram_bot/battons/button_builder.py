@@ -15,7 +15,7 @@ from state_operations import getUserState, updateUserState # type: ignore
 
 
 
-def but_builder(state, context = None, resp = []):
+def but_builder(state, context = None, resp = [], rng = 1):
     keyboard = []
 
     match state:
@@ -31,19 +31,38 @@ def but_builder(state, context = None, resp = []):
             keyboard.append([InlineKeyboardButton(text='Список задач', callback_data="show")])
             keyboard.append([InlineKeyboardButton(text='Новая задача', callback_data="new_task")])
         case "showAll": 
-            i = 1
+            i = rng
             if resp:
-                for task in resp:
-                    btn = InlineKeyboardButton(text=str(i)+". " + task['title'], callback_data="task_"+str(task['task_id']))
+                for k in range(i-1,len(resp)):
+                    btn = InlineKeyboardButton(text=str(i)+". " + resp[k]['title'], callback_data="task_"\
+                                               +str(resp[k]['task_id']))
+                    btn2 = InlineKeyboardButton(text=resp[k]['status'], callback_data="_")
+                    btn3 = InlineKeyboardButton(text="☑️", callback_data="taskOk_"+str(resp[k]['task_id']))
+                    btn4 = InlineKeyboardButton(text="❌", callback_data="del_"+str(resp[k]['task_id']))
                     keyboard.append([btn])
+                    keyboard.append([btn2,btn3,btn4])
+                    print(i)
+                    if i%5 == 0:
+                        break
                     i += 1
+                nxt = InlineKeyboardButton(text='▶️', callback_data="show_" + str(i+1))
+                prev = InlineKeyboardButton(text='◀️', callback_data="show_" + str(rng-5))
+                rsp = []
+                if i > 5:
+                    rsp.append(prev)
+                
+                if i < len(resp):
+                    rsp.append(nxt)
+                keyboard.append(rsp)
+                        
+                    
             keyboard.append([InlineKeyboardButton(text='Меню', callback_data="kb")])
         case "task": 
-            keyboard.append([InlineKeyboardButton(text='Удалить задачу', callback_data="del")])
-            keyboard.append([InlineKeyboardButton(text='Список задач', callback_data="show")])
-            keyboard.append([InlineKeyboardButton(text='Новая задача', callback_data="new_task")])
+            btn = InlineKeyboardButton(text='❌', callback_data="del")
+            btn2 = InlineKeyboardButton(text='Список задач', callback_data="show")
+            btn3 = InlineKeyboardButton(text='Новая задача', callback_data="new_task")
+            keyboard.append([btn2,btn3,btn])
             keyboard.append([InlineKeyboardButton(text='Меню', callback_data="kb")])
         case _:
             keyboard.append([InlineKeyboardButton(text='Меню', callback_data="kb")])
-        
     return InlineKeyboardMarkup(inline_keyboard = keyboard)
