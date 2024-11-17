@@ -22,7 +22,7 @@ from handlers import router # type: ignore
 # read_data ("data.txt")
 
 # Удалено чтение токена из файла, пока хз почему не работает
-API_TOKEN = '7767052229:AAGcy1tK09SyCAXXz17Uso41WSYQqD-RxRM'
+API_TOKEN = '7744140930:AAEtaKzDfFEls5-dc6KPMNui7Mzfv0zasiM'
 
 
 async def main():

@@ -74,7 +74,6 @@ try:
                             parent_id = %s
                         WHERE task_id = %s'''
             cursor.execute(query,[title, description, due_date, status, priority, creatad_at, parent_id, task_id])
-            response = cursor.fetchall()
             return None
 # Обновить заголовок
     def updateTaskTitle(task_id, title):
@@ -83,7 +82,6 @@ try:
                         SET title = %s
                         WHERE task_id = %s'''
             cursor.execute(query,[title, task_id])
-            response = cursor.fetchall()
             return None
 
 # Обновить описание
@@ -102,7 +100,15 @@ try:
                         SET due_date = %s
                         WHERE task_id = %s'''
             cursor.execute(query,[date, task_id])
-            response = cursor.fetchall()
+            return None
+        
+# Обновить статус   
+    def updateTaskDate(task_id, status):
+        with connect.cursor() as cursor:
+            query = '''UPDATE Tasks
+                        SET status = %s
+                        WHERE task_id = %s'''
+            cursor.execute(query,[status, task_id])
             return None
 
 except Exception as _ex:
