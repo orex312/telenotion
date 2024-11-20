@@ -2,5 +2,5 @@ __pycache__/
 venv/
 lol.txt
 help/
-bot_info.txt
+bot_info.json
 makefile

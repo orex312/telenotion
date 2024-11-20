@@ -15,13 +15,16 @@ class BOT:
           self.BOT_TOKEN = BOT_TOKEN
           self.URL = URL
           self.MAX_COUNTER = MAX_COUNTER
-	
 
-def read_data (sFile_data):
-	pFile_data = open (sFile_data, "r")
-	read_token = pFile_data.readline ()
-	return read_token
-API_TOKEN = read_data ("bot_info.txt")
+
+# чтение даты из json файла
+def read_json_data (sFile_json_data):
+    with open (sFile_json_data, 'r') as json_file:
+         data = json.load (json_file)
+    return data
+bot_data = read_json_data ('bot_info.json')
+
+API_TOKEN = bot_data["bot_token"]
 
 
 
@@ -37,10 +40,16 @@ async def send_weather (message: Message):
       resp = requests.get (api_url)
       await message.reply (resp.text)
       return 0
-    
+
+@dp.message (Command("json"))
+async def send_text_echo(message: Message):
+    print(message.model_dump_json(indent=4, exclude_none=True)) # строка исключительно для тестов
+    await message.reply (message.model_dump_json(indent=4, exclude_none=True))
+
 #dp.message.register(send_weather, F.content_type == ContentType.TEXT)
 
 # Она запускает поллинг, то есть постоянный опрос сервера Telegram на наличие апдейтов для бота
 if __name__ == '__main__':
     logging.basicConfig(level=logging.INFO)
     dp.run_polling(bot)
+
