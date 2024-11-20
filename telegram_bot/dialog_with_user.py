@@ -1,5 +1,7 @@
 # попробуем иначе
 import logging
+import requests
+import json
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
@@ -8,8 +10,11 @@ from aiogram import F
 
 
 
-class BOT (object) :
-	API_TOKEN = 123
+class BOT:
+	def __init__(self, BOT_TOKEN, URL, MAX_COUNTER):
+          self.BOT_TOKEN = BOT_TOKEN
+          self.URL = URL
+          self.MAX_COUNTER = MAX_COUNTER
 	
 
 def read_data (sFile_data):
@@ -25,12 +30,14 @@ bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
 
-async def send_any_echo(message: Message):
-    print ("================================================================================================================ANY")
-    print(message.model_dump_json(indent=4, exclude_none=True))
-    await message.send_copy (chat_id = message.chat.id)
+@dp.message (Command(commands=["weather"]))
+async def send_weather (message: Message):
+      api_url = 'https://api.telegram.org/bot7767052229:AAGcy1tK09SyCAXXz17Uso41WSYQqD-RxRM/sendMessage?chat_id=235503146&text=Привет, Mikhail!'
+      resp = requests.get (api_url)
+      await message.reply (resp.text)
+      return 0
     
-dp.message.register(send_any_echo)
+#dp.message.register(send_weather, F.content_type == ContentType.TEXT)
 
 # Она запускает поллинг, то есть постоянный опрос сервера Telegram на наличие апдейтов для бота
 if __name__ == '__main__':
