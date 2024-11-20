@@ -29,10 +29,11 @@ API_TOKEN = read_data ("bot_info.txt")
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
-
+tg_api = 'https://api.telegram.org/bot'
 @dp.message (Command(commands=["weather"]))
 async def send_weather (message: Message):
       api_url = 'https://api.telegram.org/bot7767052229:AAGcy1tK09SyCAXXz17Uso41WSYQqD-RxRM/sendMessage?chat_id=235503146&text=Привет, Mikhail!'
+      req_url = f'{api_url}{BOT}/'
       resp = requests.get (api_url)
       await message.reply (resp.text)
       return 0
