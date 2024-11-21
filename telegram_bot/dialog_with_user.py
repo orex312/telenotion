@@ -1,5 +1,5 @@
 # попробуем иначе
-import telegram_bot.bot_config as bot_config
+import bot_config
 import logging
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
@@ -19,7 +19,7 @@ bot = Bot(bot_config.bot_token)
 dp = Dispatcher()
 
 # ========================================================================================================= описание прайса
-PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = 500*100) # amount сумма в копейках
+PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = 10 * 100) #копейки
 
 # ============================================================================================================= обработчики
 @dp.message (Command("pay"))
@@ -32,11 +32,29 @@ async def buy_month (message: types.Message):
                            description="Активация подписки на бота на 1 месяц",
                            provider_token=bot_config.pay_token,
                            currency="rub",
+						   #photo_url="../photo_2024-11-21_10-32-46.jpg",
                            is_flexible=False,
                            prices=[PRICE],
                            start_parameter="one-month-subscription",
                            payload="test-invoice-payload")
 
+# обработка и утверждение платежа перед тем, как пользователь его совершит
+@dp.pre_checkout_query (lambda query: True)
+async def pre_checkout (pre_checkout_q: types.PreCheckoutQuery):
+	await bot.answer_pre_checkout_query (pre_checkout_q.id, ok=True)
+
+# обработка успешного платежа
+async def succesful_payment (message: types.Message):
+	print ("Succesful payment:")
+	payment_info = message.successful_payment
+	await message.reply (payment_info.model_dump_json(indent=4, exclude_none=True))
+	await bot.send_message (message.chat.id, 
+						f"Платеж на сумму {message.successful_payment.total_amount // 100} {message.successful_payment.currency} прошел успешно!!!")
+@dp.message.register  (succesful_payment, F.content_type == ContentType.SUCCESSFUL_PAYMENT)
+
+
+
+# тестилка
 @dp.message (Command("json"))
 async def send_reply_json(message: types.Message):
     print(message.model_dump_json(indent=4, exclude_none=True)) # строка исключительно для тестов
