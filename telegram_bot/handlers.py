@@ -7,18 +7,34 @@ from logic.task import taskCreating, taskShows, showTask # type: ignore
 sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 
 
-from aiogram import types, F, Router
+from aiogram import Bot, types, F, Router
 from aiogram.types import Message
 from aiogram.filters import Command
 from user_operations import addNewUser, getUserByLogin, getUserIdByName, getUserById # type: ignore 
 from state_operations import addUserState, getUserStateByLogin, getUserState, updateUserState # type: ignore
 from tasks_operations import getTasksByUser, getTasksById, delTask, updateTaskDate # type: ignore
 
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from aiogram import BaseMiddleware
+
+
 
 import kb
 import text
 
 router = Router()
+
+
+@router.message(Command("send"))
+async def start_handler(msg: Message, bot: Bot, scheduler: AsyncIOScheduler):
+    user_id = addNewUser(str(msg.from_user.id), str(msg.from_user.username))
+    id = msg.chat.id
+    print(id)
+    user_state = getUserState(user_id)
+    # задаём выполнение задачи в равные промежутки времени
+    scheduler.add_job(bot.send_message,'interval',seconds=10 ,args=(id,"Я напоминаю каждые 10 секунд"))
+    # задаём выполнение задачи по cron - гибкий способ задавать расписание. Подробнеее https://crontab.guru/#8_*_*_4
+    scheduler.add_job(bot.send_message,'cron',hour=17,minute=21,args=(id,"Я напомнил в 17 17 по Москве"))
 
 
 @router.message(F.text.in_({"/kb","Меню"}))
