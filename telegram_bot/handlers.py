@@ -275,11 +275,11 @@ async def message_handler(msg: Message):
     context = user_state["context"]
     match step:
         case "createTask":
-            text = taskCreating(user_id, context, msg.text)
+            text, task_id = taskCreating(user_id, context, msg.text)
             user_state = getUserState(user_id)
             step = user_state["curent_step"]
             context = user_state["context"]
-            if text: await msg.answer(text,reply_markup=but_builder(step, context=context))
+            if text: await msg.answer(text,reply_markup=but_builder(step, context=context, task_id=task_id))
 
         case "showAll":
             text = taskShows(user_id, context, msg.text)

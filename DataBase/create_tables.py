@@ -25,7 +25,7 @@ def create_tables(connection):
                     "due_date" date,
                     "status" varchar(20) DEFAULT 'Open',
                     "priority" varchar(250),
-                    "creatad_at" date NOT NULL DEFAULT '1.1.2000',
+                    "creatad_at" timestamp NOT NULL DEFAULT '1.1.2000',
                     "parent_id" int REFERENCES Tasks(task_id),
                     PRIMARY KEY(task_id),
                     FOREIGN KEY(user_id) REFERENCES Users(user_id) ON DELETE CASCADE,

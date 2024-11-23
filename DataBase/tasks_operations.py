@@ -17,7 +17,8 @@ try:
                 task_id += 1
             query = '''INSERT INTO Tasks (task_id, user_id, title, description, due_date, status, priority, creatad_at, parent_id)
                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
-            cursor.execute(query, [task_id, user_id, title, descryption, due_date, status, priority, date.today(), parent_id])
+            cursor.execute(query, [task_id, user_id, title, descryption, due_date, status, priority,\
+                                   datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'), parent_id])
             return task_id
 
 #---------------------------------------------------------------
