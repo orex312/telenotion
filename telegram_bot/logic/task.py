@@ -29,6 +29,8 @@ def taskShows(user_id, context, msg):
             if not resp or (resp['user_id'] != user_id):
                 return 'Введен номер несуществующей задачи'
             delTask(msg[1])
+        case _ :
+            return 0
 
     return 'Задача удалена'
 
