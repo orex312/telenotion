@@ -15,7 +15,7 @@ from state_operations import getUserState, updateUserState # type: ignore
 
 
 
-def but_builder(state, context = None, resp = [], rng = 1):
+def but_builder(state, context = None, resp = [], rng = 1, task_id = None):
     keyboard = []
 
     match state:
@@ -59,9 +59,14 @@ def but_builder(state, context = None, resp = [], rng = 1):
             keyboard.append([InlineKeyboardButton(text='Меню', callback_data="kb")])
         case "task": 
             btn = InlineKeyboardButton(text='❌', callback_data="del")
-            btn2 = InlineKeyboardButton(text='Список задач', callback_data="show")
-            btn3 = InlineKeyboardButton(text='Новая задача', callback_data="new_task")
+            btn2 = InlineKeyboardButton(text='Напоминание', callback_data="remind_"+str(task_id))
+            btn3 = InlineKeyboardButton(text="☑️", callback_data="taskOk_"+str(task_id))
             keyboard.append([btn2,btn3,btn])
+            keyboard.append([InlineKeyboardButton(text='Меню', callback_data="kb")])
+        case "remind":  
+            btn = InlineKeyboardButton(text='↩️', callback_data="task_"+str(task_id))
+            btn3 = InlineKeyboardButton(text='Новая задача', callback_data="new_task")
+            keyboard.append([btn, btn3])
             keyboard.append([InlineKeyboardButton(text='Меню', callback_data="kb")])
         case _:
             keyboard.append([InlineKeyboardButton(text='Меню', callback_data="kb")])

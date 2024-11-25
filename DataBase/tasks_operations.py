@@ -17,7 +17,8 @@ try:
                 task_id += 1
             query = '''INSERT INTO Tasks (task_id, user_id, title, description, due_date, status, priority, creatad_at, parent_id)
                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
-            cursor.execute(query, [task_id, user_id, title, descryption, due_date, status, priority, date.today(), parent_id])
+            cursor.execute(query, [task_id, user_id, title, descryption, due_date, status, priority,\
+                                   datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'), parent_id])
             return task_id
 
 #---------------------------------------------------------------
@@ -35,9 +36,12 @@ try:
 # Получить атску по юзеру    
     def getTasksByUser(user_id):
         with connect.cursor() as cursor:
-            query = '''SELECT json_agg(Tasks) FROM Tasks
-                    WHERE user_id = %s
-                    AND parent_id is null'''
+            query = '''with temp as(
+                            SELECT * FROM Tasks
+                                WHERE user_id = 10
+                                AND parent_id is null
+                                order by creatad_at desc)
+                        select jsonb_agg(temp) from temp '''
             cursor.execute(query,[user_id])
             response = cursor.fetchall()
             return response[0][0]
@@ -103,7 +107,7 @@ try:
             return None
         
 # Обновить статус   
-    def updateTaskDate(task_id, status):
+    def updateTaskStatus(task_id, status):
         with connect.cursor() as cursor:
             query = '''UPDATE Tasks
                         SET status = %s

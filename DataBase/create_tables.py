@@ -19,13 +19,13 @@ def create_tables(connection):
 
                 CREATE TABLE IF NOT EXISTS Tasks(
                     "task_id" BIGSERIAL NOT NULL,
-                    "user_id" int NOT NULL,
+                    "user_id" BIGSERIAL NOT NULL,
                     "title" varchar(50) NOT NULL,
                     "description" varchar(250),
                     "due_date" date,
                     "status" varchar(20) DEFAULT 'Open',
                     "priority" varchar(250),
-                    "creatad_at" date NOT NULL DEFAULT '1.1.2000',
+                    "creatad_at" timestamp NOT NULL DEFAULT '1.1.2000',
                     "parent_id" int REFERENCES Tasks(task_id),
                     PRIMARY KEY(task_id),
                     FOREIGN KEY(user_id) REFERENCES Users(user_id) ON DELETE CASCADE,
@@ -34,9 +34,10 @@ def create_tables(connection):
 
                 CREATE TABLE IF NOT EXISTS Reminders (
                     "reminder_id" BIGSERIAL NOT NULL,
-                    "task_id" int NOT NULL,
-                    "remind_at" timestamp NOT NULL,
+                    "task_id" BIGINT NOT NULL,
+                    "remind_at" varchar(50) NOT NULL,
                     "sent" bool DEFAULT False,
+                    "chat_id" BIGSERIAL,
                     PRIMARY KEY (reminder_id),
                     FOREIGN KEY(task_id) REFERENCES Tasks(task_id) ON DELETE CASCADE
                 );
