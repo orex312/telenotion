@@ -38,7 +38,7 @@ try:
         with connect.cursor() as cursor:
             query = '''with temp as(
                             SELECT * FROM Tasks
-                                WHERE user_id = 10
+                                WHERE user_id = %s
                                 AND parent_id is null
                                 order by creatad_at desc)
                         select jsonb_agg(temp) from temp '''
