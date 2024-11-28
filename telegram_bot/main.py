@@ -39,8 +39,8 @@ async def main():
     dp.update.middleware(
         SchedulerMiddleware(scheduler=scheduler),
     )
-    from dialogs import start_dialog
-    dp.include_routers(start_dialog, router)
+    from dialogs import start_dialog, create_task
+    dp.include_routers(start_dialog, router, create_task)
     setup_dialogs(dp)
     from notions.notions import notion, notion_old
     await notion_old()

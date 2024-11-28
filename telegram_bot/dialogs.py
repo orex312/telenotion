@@ -1,17 +1,18 @@
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, Router
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandStart
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message, User
 from aiogram_dialog import Dialog, DialogManager, StartMode, Window, setup_dialogs
-from aiogram_dialog.widgets.text import Const  # Здесь будем импортировать нужные виджеты
 from environs import Env
 from aiogram.filters import Command
-from aiogram import Bot, types, F, Router
 from aiogram.fsm.storage.memory import MemoryStorage # -- хранилища данных для состояний пользователей
 from aiogram_dialog.widgets.text import Const, Format
 from aiogram_dialog.widgets.kbd import Button, Select, Group, ScrollingGroup, SwitchTo
+from aiogram_dialog.widgets.input import TextInput, ManagedTextInput
+from aiogram.enums import ContentType, ParseMode
+from aiogram_dialog.widgets.input import MessageInput
 from magic_filter import F
 import os
 import sys
@@ -19,7 +20,7 @@ import sys
 
 sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 
-from tasks_operations import getTasksByUser, getTasksById, delTask, updateTaskDate, updateTaskStatus # type: ignore
+from tasks_operations import getTasksByUser, getTasksById, delTask, updateTaskDate, updateTaskStatus, addNewTask # type: ignore
 from user_operations import addNewUser, getUserByLogin, getUserIdByName, getUserById # type: ignore 
 
 env = Env()
@@ -31,10 +32,29 @@ bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTM
 dp = Dispatcher(storage=MemoryStorage())
 
 
-class StartSG(StatesGroup):
+class MainDialog(StatesGroup):
     start = State()
     task_list = State()
     show_task = State()
+
+class TaskCreating(StatesGroup):
+    title = State()
+    description = State()
+    accept = State()
+
+
+async def go_main(
+        callback: CallbackQuery, 
+        button: Button,
+        dialog_manager: DialogManager):
+    await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
+
+async def create_task(
+        callback: CallbackQuery, 
+        button: Button,
+        dialog_manager: DialogManager
+):
+    await dialog_manager.start(state=TaskCreating.title)
 
 # Это геттер
 async def get_name(event_from_user: User, **kwargs):
@@ -46,8 +66,9 @@ async def get_task_list(event_from_user: User, **kwargs):
     user_id = getUserByLogin(str(event_from_user.id))[0]["user_id"]
     resp = getTasksByUser(user_id)
     titles = []
-    for i in resp:
-        titles.append([i["title"],i["task_id"]])
+    if resp:
+        for i in resp:
+            titles.append([i["title"],i["task_id"]])
     return {'tasks': resp, "titles": titles}
 
 async def get_task(dialog_manager: DialogManager, **kwargs):
@@ -69,17 +90,99 @@ async def go_next(callback: CallbackQuery, button: Button, dialog_manager: Dialo
     await dialog_manager.next()
 
 async def go_main_menu(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.start(state=StartSG.start, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
+
+
+async def start_title(dialog_manager: DialogManager, **kwargs):
+    if "title" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["title"] = ''
+    title = dialog_manager.dialog_data["title"]
+    print(title)
+    if "description" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["description"] = ''
+    description = dialog_manager.dialog_data["description"]
+    return {"title": title, "description": description}
+    
+async def start_description(dialog_manager: DialogManager, **kwargs):
+    if "title" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["title"] = ''
+    title = dialog_manager.dialog_data["title"]
+    print(title)
+    if "description" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["description"] = ''
+    description = dialog_manager.dialog_data["description"]
+    return {"title": title, "description": description}
+
+async def start_accept(dialog_manager: DialogManager, **kwargs):
+    if "title" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["title"] = ''
+    title = dialog_manager.dialog_data["title"]
+    print(title)
+    if "description" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["description"] = ''
+    description = dialog_manager.dialog_data["description"]
+    return {"title": title, "description": description}
+
+def title_check(text: str) -> str:
+    if len(text) < 50:
+        return text
+    raise ValueError
+
+def description_check(text: str) -> str:
+    if len(text) < 250:
+        return text
+    raise ValueError
+
+async def correct_title_handler(
+        message: Message, 
+        widget: ManagedTextInput, 
+        dialog_manager: DialogManager, 
+        text: str) -> None:
+    dialog_manager.dialog_data["title"] = text
+    print(dialog_manager.dialog_data["title"] + " хуй")
+    await dialog_manager.next()
+
+async def correct_description_handler(
+        message: Message, 
+        widget: ManagedTextInput, 
+        dialog_manager: DialogManager, 
+        text: str) -> None:
+    dialog_manager.dialog_data["description"] = text
+    await dialog_manager.next()
+
+async def error_handler(
+        message: Message, 
+        widget: ManagedTextInput, 
+        dialog_manager: DialogManager, 
+        error: ValueError):
+    await message.answer(
+        text='Вы ввели слишком длинное название 😱 (подробно описать можно в описании задачи на следующем шаге)'
+    )
+
+async def no_text(message: Message, widget: MessageInput, dialog_manager: DialogManager):
+    #print(type(widget))
+    await message.answer(text='Я пока могу обрабатывать только текст 😔')
+
+async def save_task(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
+    print(callback.from_user.username, type(callback.from_user.username))
+    user_id = getUserIdByName(callback.from_user.username)
+    print(user_id)
+    title = dialog_manager.dialog_data["title"]
+    description = dialog_manager.dialog_data["description"]
+    print(title, description)
+    task_id = addNewTask(user_id=user_id, title=title, description=description)
+    print(task_id)
+    await dialog_manager.done()
 
 start_dialog = Dialog(
     Window(
         Format(text="Привет {user_name}"),
         Group(
-            SwitchTo(Const("Список задач"), id='task_list', state=StartSG.task_list),
-            Button(Const("Создать задачу"), id="crawl"),
+            SwitchTo(Const("Список задач"), id='task_list', state=MainDialog.task_list),
+            Button(Const("Создать задачу"), id="crawl", on_click=create_task),
         ),
-        state=StartSG.start,
-        getter=get_name
+        state=MainDialog.start,
+        getter=get_name,
     ),
     Window(
         Const(text="Список задач"),
@@ -96,27 +199,93 @@ start_dialog = Dialog(
             height=5,  # Количество строк
         ),
         Button(Const("Меню"), id="task", on_click=go_main_menu),
-        state=StartSG.task_list,
+        state=MainDialog.task_list,
         getter=get_task_list
     ),
     Window(
         Format(text="{title}"),
         Format(text="{description}", when="description"),
         Group(
-            Button(Const("Удалить"), id="task", on_click=delete_task),
-            SwitchTo(Const("Назад"), id='task_list', state=StartSG.task_list),
+            Button(Const("Удалить ❌"), id="task", on_click=delete_task),
+            SwitchTo(Const("Назад"), id='task_list', state=MainDialog.task_list),
             width=2,
         ),
-        state=StartSG.show_task,
+        state=MainDialog.show_task,
         getter=get_task
     )
+)
+
+
+
+create_task = Dialog(
+    Window(
+        Format(text="Название: {title}", when="title"),
+        Format(text="Описание: {description}", when="description"),
+        Const(text="Введи название задачи:"),
+        Group(
+            SwitchTo(Const("Готово ✅"), id='task_list', state=TaskCreating.accept, when="title"),
+            SwitchTo(Const("Ввести описание"), id='task_list', state=TaskCreating.description, when="title"),
+            Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
+            width=2,
+        ),
+        TextInput(
+            id='title_input',
+            type_factory=title_check,
+            on_success=correct_title_handler,
+            on_error=error_handler,
+        ),
+        MessageInput(
+            func=no_text,
+            content_types=ContentType.ANY
+        ),
+        state=TaskCreating.title,
+        getter=start_title
+    ),
+    Window(
+        Format(text="Название: {title}"),
+        Format(text="Описание: {description}", when="description"),
+        Const(text="Введи описание задачи:"),
+        Group(
+            SwitchTo(Const("Готово ✅"), id='task_accept', state=TaskCreating.accept),
+            SwitchTo(Const("Изменить название"), id='task_desc', state=TaskCreating.title),
+            Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
+            width=2,
+        ),
+        TextInput(
+            id='description_input',
+            type_factory=description_check,
+            on_success=correct_description_handler,
+            on_error=error_handler,
+        ),
+        MessageInput(
+            func=no_text,
+            content_types=ContentType.ANY
+        ),
+        state=TaskCreating.description,
+        getter=start_description
+    ),
+    Window(
+        Const(text="Задача:"),
+        Format(text="Название: {title}"),
+        Format(text="Описание: {description}", when="description"),
+        Group(
+            Button(Const("Сохранить задачу"), id='task_save', on_click=save_task),
+            SwitchTo(Const("Изменить название"), id='title', state=TaskCreating.title),
+            SwitchTo(Const("Изменить описание"), id='task_desc', state=TaskCreating.description),
+            Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
+            width=2,
+        ),
+        state=TaskCreating.accept,
+        getter=start_accept
+    ),
+    
 )
 
 router = Router()
 # Этот классический хэндлер будет срабатывать на команду /start
 @router.message(Command("start"))
 async def command_start_process(message: Message, dialog_manager: DialogManager):
-    await dialog_manager.start(state=StartSG.start, mode=StartMode.RESET_STACK)
+    await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
 
 if __name__ == "__main__":
     dp.include_router(start_dialog)
