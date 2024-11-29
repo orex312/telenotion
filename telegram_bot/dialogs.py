@@ -31,7 +31,7 @@ BOT_TOKEN = '7744140930:AAEtaKzDfFEls5-dc6KPMNui7Mzfv0zasiM'
 bot = Bot(token=BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
 dp = Dispatcher(storage=MemoryStorage())
 
-
+#=================================Состояния диалогов=================================================================
 class MainDialog(StatesGroup):
     start = State()
     task_list = State()
@@ -42,6 +42,11 @@ class TaskCreating(StatesGroup):
     description = State()
     accept = State()
 
+
+#=================================Переходы между диалогами#===========================================================
+
+async def go_main_menu(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
+    await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
 
 async def go_main(
         callback: CallbackQuery, 
@@ -56,6 +61,8 @@ async def create_task(
 ):
     await dialog_manager.start(state=TaskCreating.title)
 
+
+#=================================Стартеры маин диалога#===============================================================
 # Это геттер
 async def get_name(event_from_user: User, **kwargs):
     
@@ -78,6 +85,8 @@ async def get_task(dialog_manager: DialogManager, **kwargs):
     resp = getTasksById(task_id)[0]
     return {'task': resp["task_id"], "title": resp["title"], "description": resp["description"]}
 
+#=================================Обработчики маин диалога#============================================================
+
 async def delete_task(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     #await callback.message.answer(item_id)
     task_id = dialog_manager.dialog_data["task_id"]
@@ -89,9 +98,7 @@ async def go_next(callback: CallbackQuery, button: Button, dialog_manager: Dialo
     dialog_manager.dialog_data["task_id"] = task_id
     await dialog_manager.next()
 
-async def go_main_menu(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
-
+#=================================Стартеры создания таски#=============================================================
 
 async def start_title(dialog_manager: DialogManager, **kwargs):
     if "title" not in dialog_manager.dialog_data:
@@ -123,6 +130,22 @@ async def start_accept(dialog_manager: DialogManager, **kwargs):
     description = dialog_manager.dialog_data["description"]
     return {"title": title, "description": description}
 
+
+#=================================Сохранение таски#=====================================================================
+
+async def save_task(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
+    print(callback.from_user.username, type(callback.from_user.username))
+    user_id = getUserIdByName(callback.from_user.username)
+    print(user_id)
+    title = dialog_manager.dialog_data["title"]
+    description = dialog_manager.dialog_data["description"]
+    print(title, description)
+    task_id = addNewTask(user_id=user_id, title=title, description=description)
+    print(task_id)
+    await dialog_manager.done()
+
+#=================================Проверка юзер вавода для тасок#=======================================================
+
 def title_check(text: str) -> str:
     if len(text) < 50:
         return text
@@ -139,7 +162,6 @@ async def correct_title_handler(
         dialog_manager: DialogManager, 
         text: str) -> None:
     dialog_manager.dialog_data["title"] = text
-    print(dialog_manager.dialog_data["title"] + " хуй")
     await dialog_manager.next()
 
 async def correct_description_handler(
@@ -150,7 +172,7 @@ async def correct_description_handler(
     dialog_manager.dialog_data["description"] = text
     await dialog_manager.next()
 
-async def error_handler(
+async def error_title_handler(
         message: Message, 
         widget: ManagedTextInput, 
         dialog_manager: DialogManager, 
@@ -159,23 +181,23 @@ async def error_handler(
         text='Вы ввели слишком длинное название 😱 (подробно описать можно в описании задачи на следующем шаге)'
     )
 
+async def error_description_handler(
+        message: Message, 
+        widget: ManagedTextInput, 
+        dialog_manager: DialogManager, 
+        error: ValueError):
+    await message.answer(
+        text='Вы ввели слишком длинное описание 😔 (я пока не могу столько запомнить)'
+    )
+
 async def no_text(message: Message, widget: MessageInput, dialog_manager: DialogManager):
     #print(type(widget))
     await message.answer(text='Я пока могу обрабатывать только текст 😔')
 
-async def save_task(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    print(callback.from_user.username, type(callback.from_user.username))
-    user_id = getUserIdByName(callback.from_user.username)
-    print(user_id)
-    title = dialog_manager.dialog_data["title"]
-    description = dialog_manager.dialog_data["description"]
-    print(title, description)
-    task_id = addNewTask(user_id=user_id, title=title, description=description)
-    print(task_id)
-    await dialog_manager.done()
+#=================================Маин диалог#=========================================================================
 
 start_dialog = Dialog(
-    Window(
+    Window(                                                                        #--------Основное окно
         Format(text="Привет {user_name}"),
         Group(
             SwitchTo(Const("Список задач"), id='task_list', state=MainDialog.task_list),
@@ -184,7 +206,7 @@ start_dialog = Dialog(
         state=MainDialog.start,
         getter=get_name,
     ),
-    Window(
+    Window(                                                                        #--------Окно списка задачь
         Const(text="Список задач"),
         ScrollingGroup(
             Select(
@@ -202,7 +224,7 @@ start_dialog = Dialog(
         state=MainDialog.task_list,
         getter=get_task_list
     ),
-    Window(
+    Window(                                                                        #--------Окно просмотра задачи
         Format(text="{title}"),
         Format(text="{description}", when="description"),
         Group(
@@ -216,9 +238,10 @@ start_dialog = Dialog(
 )
 
 
+#=================================Создание таски#======================================================================
 
 create_task = Dialog(
-    Window(
+    Window(                                                                        #--------Ввод заголовка
         Format(text="Название: {title}", when="title"),
         Format(text="Описание: {description}", when="description"),
         Const(text="Введи название задачи:"),
@@ -241,7 +264,7 @@ create_task = Dialog(
         state=TaskCreating.title,
         getter=start_title
     ),
-    Window(
+    Window(                                                                        #--------Ввод описания
         Format(text="Название: {title}"),
         Format(text="Описание: {description}", when="description"),
         Const(text="Введи описание задачи:"),
@@ -264,7 +287,7 @@ create_task = Dialog(
         state=TaskCreating.description,
         getter=start_description
     ),
-    Window(
+    Window(                                                                        #--------Подтверждение создания
         Const(text="Задача:"),
         Format(text="Название: {title}"),
         Format(text="Описание: {description}", when="description"),
