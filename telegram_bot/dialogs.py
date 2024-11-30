@@ -462,6 +462,7 @@ router = Router()
 # Этот классический хэндлер будет срабатывать на команду /start
 @router.message(Command("start"))
 async def command_start_process(message: Message, dialog_manager: DialogManager):
+    addNewUser (str(message.from_user.id), str(message.from_user.username))
     await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
 
 if __name__ == "__main__":
