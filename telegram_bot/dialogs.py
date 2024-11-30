@@ -412,6 +412,7 @@ notion_create = Dialog(
         Multi(Format(text="Выбрана дата: {date}", when="date"), Format(text="время: {time}", when="time"), sep =" "),
         Const("Измените время уведомления:", when="time"),
         Const("Выберите время уведомления:", when="nottime"),
+        Const("Или отправьте в формате ЧЧ:ММ:"),
         ScrollingGroup(
             Select(
                 text=Format("{item}"),
@@ -423,6 +424,14 @@ notion_create = Dialog(
             id = "scroll",
             width=4,  # Количество кнопок в строке
             height=6,  # Количество строк
+        ),
+        TextInput(
+            id='description_input',
+            on_success=on_time_selected,
+        ),
+        MessageInput(
+            func=no_text,
+            content_types=ContentType.ANY
         ),
         SwitchTo(Const("Оставить"), id='title', state=NotionCreating.accept, when="time"),
         Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
