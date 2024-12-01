@@ -15,7 +15,7 @@ import random
 
 
 
-BOT_TOKEN = bot_config.main_bot_token
+BOT_TOKEN = bot_config.test_bot_token
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -26,6 +26,8 @@ class MainDialog(StatesGroup):
 	start = State()
 	all_welcome = State()
 	donate = State()
+	donate_rubs = State()
+	donate_stars = State()
 	
 
 
@@ -69,13 +71,13 @@ async def command_start_process(message: Message, dialog_manager: DialogManager)
 PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = 10 * 100) #копейки
 async def donate_rubs_done (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
 	message = callback.message
-	#if bot_config.main_pay_token.split(':')[1] == 'TEST':
+	#if bot_config.test_pay_token.split(':')[1] == 'TEST':
 	#	await bot.send_message(message.chat.id, "Попробуем оплатить")
     
 	await bot.send_invoice(message.chat.id,
                            title="Подписка на бота",
                            description="Активация подписки на бота на 1 месяц",
-                           provider_token=bot_config.main_pay_token,
+                           provider_token=bot_config.test_pay_token,
                            currency="rub",
                            is_flexible=False,
                            prices=[PRICE],
@@ -134,6 +136,7 @@ async def get_welcome_words (event_from_user: User, **kwargs):
 
 
 start_dialog = Dialog(
+	# Стартовое окно
 	Window (
 		Case (
 			texts={
@@ -155,6 +158,7 @@ start_dialog = Dialog(
 		getter=welcome_getter,
 		state=MainDialog.start,
 	),
+	# Окно списка приветствий
 	Window (
 		Format (text='Список приветствий'),
 		List (
@@ -164,17 +168,31 @@ start_dialog = Dialog(
 		getter = get_welcome_words,
 		state = MainDialog.all_welcome,
 	),
+	# Окно выбора варианта доната
 	Window (
 		Format (text=text.donate_word),
 		Column (
-			Button (Const(text.donate_stars), id = text.donate_stars_id),
-			Button (Const(text.donate_rubs), id = text.donate_rubs_id, on_click=donate_rubs_done),
+			SwitchTo (Const(text.donate_stars), id = text.donate_stars_id, state = MainDialog.donate_stars),
+			SwitchTo (Const(text.donate_rubs), id = text.donate_rubs_id, state = MainDialog.donate_rubs),
 		),
 		SwitchTo (Const('back'), id='back', state=MainDialog.start),
 		getter=get_username,
 		state = MainDialog.donate,
 	),
-
+	# Окно диалога доната рублями
+	Window (
+		Format (text.welcome_donate_rubs),
+		SwitchTo (Const('back'), id='back', state=MainDialog.donate),
+		getter=get_username,
+		state = MainDialog.donate_rubs
+	),
+	# Окно диалога доната звездами
+	Window (
+		Format (text.welcome_donate_stars),
+		SwitchTo (Const('back'), id='back', state=MainDialog.donate),
+		getter=get_username,
+		state = MainDialog.donate_stars
+	),
 )
 
 
