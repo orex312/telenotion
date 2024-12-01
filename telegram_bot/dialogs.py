@@ -179,7 +179,7 @@ async def save_task(callback: CallbackQuery, button: Button, dialog_manager: Dia
     title = dialog_manager.dialog_data["title"]
     description = dialog_manager.dialog_data["description"]
     print(title, description)
-    if "task_id" in dialog_manager.start_data:
+    if dialog_manager.start_data and "task_id" in dialog_manager.start_data:
         task_id = dialog_manager.start_data["task_id"]
         updateTaskTitle(task_id, title)
         updateTaskDescription(task_id, description)
