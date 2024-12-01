@@ -200,6 +200,22 @@ def description_check(text: str) -> str:
         return text
     raise ValueError
 
+def time_check(text: str) -> str:
+    resp = text.split(":")
+    if len(resp) == 2:
+        hour = resp[0]
+        minute = resp[1]
+        if not hour.isdigit() or not minute.isdigit():
+            raise ValueError
+        hour = int(hour)
+        minute = int(minute)
+        if hour > 24 or hour < 0:
+            raise ValueError
+        if minute > 60 or minute < 0:
+            raise ValueError
+        return text
+    raise ValueError
+
 async def correct_title_handler(
         message: Message, 
         widget: ManagedTextInput, 
@@ -241,6 +257,15 @@ async def error_description_handler(
         error: ValueError):
     await message.answer(
         text='Вы ввели слишком длинное описание 😔 (я пока не могу столько запомнить)'
+    )
+
+async def error_time_handler(
+        message: Message, 
+        widget: ManagedTextInput, 
+        dialog_manager: DialogManager, 
+        error: ValueError):
+    await message.answer(
+        text='Вы ввели время в неправильном формате 😱'
     )
 
 async def no_text(message: Message, widget: MessageInput, dialog_manager: DialogManager):
@@ -479,7 +504,9 @@ notion_create = Dialog(
         ),
         TextInput(
             id='description_input',
+            type_factory=time_check,
             on_success=on_time_selected,
+            on_error=error_time_handler,
         ),
         MessageInput(
             func=no_text,
