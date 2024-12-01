@@ -56,8 +56,6 @@ class SendNotion(StatesGroup):
 
 #=================================Переходы между диалогами#===========================================================
 
-async def go_main_menu(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
-    await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
 
 async def go_main(
         callback: CallbackQuery, 
@@ -120,7 +118,10 @@ async def go_next(callback: CallbackQuery, button: Button, dialog_manager: Dialo
 
 async def start_title(dialog_manager: DialogManager, **kwargs):
     if "title" not in dialog_manager.dialog_data:
-        dialog_manager.dialog_data["title"] = ''
+        if "title" in dialog_manager.start_data:
+            dialog_manager.dialog_data["title"] = dialog_manager.start_data["title"]
+        else:
+            dialog_manager.dialog_data["title"] = ''
     title = dialog_manager.dialog_data["title"]
     print(title)
     if "description" not in dialog_manager.dialog_data:
@@ -140,7 +141,10 @@ async def start_description(dialog_manager: DialogManager, **kwargs):
 
 async def start_accept(dialog_manager: DialogManager, **kwargs):
     if "title" not in dialog_manager.dialog_data:
-        dialog_manager.dialog_data["title"] = ''
+        if "title" in dialog_manager.start_data:
+            dialog_manager.dialog_data["title"] = dialog_manager.start_data["title"]
+        else:
+            dialog_manager.dialog_data["title"] = ''
     title = dialog_manager.dialog_data["title"]
     print(title)
     if "description" not in dialog_manager.dialog_data:
@@ -182,6 +186,15 @@ async def correct_title_handler(
     dialog_manager.dialog_data["title"] = text
     await dialog_manager.next()
 
+
+async def quick_handler(
+        message: Message, 
+        widget: ManagedTextInput, 
+        dialog_manager: DialogManager, 
+        text: str) -> None:
+    dialog_manager.dialog_data["title"] = text
+    await dialog_manager.start(state=TaskCreating.accept, data={"title": text})
+
 async def correct_description_handler(
         message: Message, 
         widget: ManagedTextInput, 
@@ -216,10 +229,19 @@ async def no_text(message: Message, widget: MessageInput, dialog_manager: Dialog
 
 start_dialog = Dialog(
     Window(                                                                        #--------Основное окно
-        Format(text="Привет {user_name}"),
+        Format(text="Привет {user_name}😉"),
+        Const(text="\n\nДля быстрого создания, сразу введите заголовок"),
         Group(
             SwitchTo(Const("Список задач"), id='task_list', state=MainDialog.task_list),
             Button(Const("Создать задачу"), id="crawl", on_click=create_task),
+        ),
+        TextInput(
+            id='quick_input',
+            on_success=quick_handler,
+        ),
+        MessageInput(
+            func=no_text,
+            content_types=ContentType.ANY
         ),
         state=MainDialog.start,
         getter=get_name,
@@ -238,7 +260,7 @@ start_dialog = Dialog(
             width=1,  # Количество кнопок в строке
             height=5,  # Количество строк
         ),
-        Button(Const("Меню"), id="task", on_click=go_main_menu),
+        Button(Const("Меню"), id="task", on_click=go_main),
         state=MainDialog.task_list,
         getter=get_task_list
     ),
