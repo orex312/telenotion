@@ -132,7 +132,7 @@ async def go_next(callback: CallbackQuery, button: Button, dialog_manager: Dialo
 
 async def start_title(dialog_manager: DialogManager, **kwargs):
     if "title" not in dialog_manager.dialog_data:
-        if "title" in dialog_manager.start_data:
+        if  dialog_manager.start_data and "title" in dialog_manager.start_data:
             dialog_manager.dialog_data["title"] = dialog_manager.start_data["title"]
         else:
             dialog_manager.dialog_data["title"] = ''
@@ -155,14 +155,14 @@ async def start_description(dialog_manager: DialogManager, **kwargs):
 
 async def start_accept(dialog_manager: DialogManager, **kwargs):
     if "title" not in dialog_manager.dialog_data:
-        if "title" in dialog_manager.start_data:
+        if  dialog_manager.start_data and "title" in dialog_manager.start_data:
             dialog_manager.dialog_data["title"] = dialog_manager.start_data["title"]
         else:
             dialog_manager.dialog_data["title"] = ''
     title = dialog_manager.dialog_data["title"]
     print(title)
     if "description" not in dialog_manager.dialog_data:
-        if "description" in dialog_manager.start_data:
+        if  dialog_manager.start_data and "description" in dialog_manager.start_data:
             dialog_manager.dialog_data["description"] = dialog_manager.start_data["description"]
         else:
             dialog_manager.dialog_data["description"] = ''
@@ -252,7 +252,7 @@ async def no_text(message: Message, widget: MessageInput, dialog_manager: Dialog
 start_dialog = Dialog(
     Window(                                                                        #--------Основное окно
         Format(text="Привет {user_name}😉"),
-        Const(text="\n\nДля быстрого создания, можно сразу ввести заголовок"),
+        Const(text="\n\n<i>Для быстрого создания, можно сразу ввести заголовок</i>"),
         Group(
             SwitchTo(Const("Список задач📋"), id='task_list', state=MainDialog.task_list),
             Button(Const("Создать задачу✏️"), id="crawl", on_click=create_task),
@@ -267,9 +267,10 @@ start_dialog = Dialog(
         ),
         state=MainDialog.start,
         getter=get_name,
+        parse_mode="HTML",
     ),
     Window(                                                                        #--------Окно списка задачь
-        Const(text="Список задач"),
+        Const(text="<b>Список задач</b>"),
         ScrollingGroup(
             Select(
                 text=Format("{item[0]}"),
@@ -284,10 +285,11 @@ start_dialog = Dialog(
         ),
         Button(Const("Меню📖"), id="task", on_click=go_main),
         state=MainDialog.task_list,
-        getter=get_task_list
+        getter=get_task_list,
+        parse_mode="HTML",
     ),
     Window(                                                                        #--------Окно просмотра задачи
-        Format(text="{title}"),
+        Format(text="<b>{title}</b>"),
         Format(text="{description}", when="description"),
         Group(
             Button(Const("Изменить✏️"), id="chang", on_click=change_task),
@@ -297,7 +299,8 @@ start_dialog = Dialog(
         ),
         SwitchTo(Const("Назад↩️"), id='task_list', state=MainDialog.task_list),
         state=MainDialog.show_task,
-        getter=get_task
+        getter=get_task,
+        parse_mode="HTML",
     )
 )
 
@@ -306,7 +309,7 @@ start_dialog = Dialog(
 
 create_task = Dialog(
     Window(                                                                        #--------Ввод заголовка
-        Format(text="Название: {title}", when="title"),
+        Format(text="Название: <b>{title}</b>", when="title"),
         Format(text="Описание: {description}", when="description"),
         Const(text="Введите название:"),
         Group(
@@ -326,10 +329,11 @@ create_task = Dialog(
             content_types=ContentType.ANY
         ),
         state=TaskCreating.title,
-        getter=start_title
+        getter=start_title,
+        parse_mode="HTML",
     ),
     Window(                                                                        #--------Ввод описания
-        Format(text="Название: {title}"),
+        Format(text="Название: <b>{title}</b>"),
         Format(text="Описание: {description}", when="description"),
         Const(text="Введи описание:"),
         Group(
@@ -349,11 +353,12 @@ create_task = Dialog(
             content_types=ContentType.ANY
         ),
         state=TaskCreating.description,
-        getter=start_description
+        getter=start_description,
+        parse_mode="HTML",
     ),
     Window(                                                                        #--------Подтверждение создания
         Const(text="Задача:"),
-        Format(text="Название: {title}"),
+        Format(text="Название: <b>{title}</b>"),
         Format(text="Описание: {description}", when="description"),
         Group(
             SwitchTo(Const("Изменить название✏️"), id='title', state=TaskCreating.title),
@@ -363,7 +368,8 @@ create_task = Dialog(
             width=2,
         ),
         state=TaskCreating.accept,
-        getter=start_accept
+        getter=start_accept,
+        parse_mode="HTML",
     ),
     
 )
@@ -444,20 +450,21 @@ time_intervals = [f"{hour:02d}:{minute:02d}" for hour in range(0, 24) for minute
 # Определяем диалог
 notion_create = Dialog(
     Window(
-        Multi(Format(text="Выбрана дата: {date}", when="date"), Format(text="время: {time}", when="time"), sep =" "),
+        Multi(Format(text="Выбрана дата: <b>{date}</b>", when="date"), Format(text="время: <b>{time}</b>", when="time"), sep =" "),
         Const("Измените дату уведомления:", when="date"),
         Const("Выберите дату уведомления:", when="notdate"),
         Calendar(id='calendar', on_click=on_date_selected),  # Используем простой календарь
         SwitchTo(Const("Оставить"), id='title', state=NotionCreating.time, when="date"),
         Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
         state=NotionCreating.date,
-        getter=get_date
+        getter=get_date,
+        parse_mode="HTML",
     ),
     Window(
-        Multi(Format(text="Выбрана дата: {date}", when="date"), Format(text="время: {time}", when="time"), sep =" "),
+        Multi(Format(text="Выбрана дата: <b>{date}</b>", when="date"), Format(text="время: <b>{time}</b>", when="time"), sep =" "),
         Const("Измените время уведомления:", when="time"),
         Const("Выберите время уведомления:", when="nottime"),
-        Const("Или отправьте в формате ЧЧ:ММ:"),
+        Const("\n<i>Или отправьте в формате ЧЧ:ММ</i>"),
         ScrollingGroup(
             Select(
                 text=Format("{item}"),
@@ -481,10 +488,11 @@ notion_create = Dialog(
         SwitchTo(Const("Оставить"), id='title', state=NotionCreating.accept, when="time"),
         Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
         state=NotionCreating.time,
-        getter=get_time
+        getter=get_time,
+        parse_mode="HTML",
     ),
     Window(                                                                        #--------Подтверждение создания
-        Multi(Format(text="Выбрана дата: {date}", when="date"), Format(text="время: {time}", when="time"), sep =" "),
+        Multi(Format(text="Выбрана дата: <b>{date}</b>", when="date"), Format(text="время: <b>{time}</b>", when="time"), sep =" "),
         Group(
             SwitchTo(Const("Изменить дату📆"), id='title', state=NotionCreating.date),
             SwitchTo(Const("Изменить время🕘"), id='task_desc', state=NotionCreating.time),
@@ -493,14 +501,15 @@ notion_create = Dialog(
             width=2,
         ),
         state=NotionCreating.accept,
-        getter=notion_accept
+        getter=notion_accept,
+        parse_mode="HTML",
     ),
 )
 
 notion = Dialog(
     Window(                                                                        #--------Подтверждение создания
         Const(text="Задача:"),
-        Format(text="Название: {title}"),
+        Format(text="Название: <b>{title}<b>"),
         Format(text="Описание: {description}", when="description"),
         Group(
             Cancel(Const("Назад↩️")),
