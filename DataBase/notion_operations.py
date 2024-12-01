@@ -46,6 +46,31 @@ try:
             if response and response[0] and response[0][0]:
                 return response[0][0]
             return None
+        
+    def getNotionById(reminder_id):
+        with connect.cursor() as cursor:
+            query = '''SELECT json_agg(reminders) From reminders
+                        where reminder_id = %s'''
+            cursor.execute(query,[reminder_id])
+            response = cursor.fetchall()
+            if response and response[0] and response[0][0]:
+                return response[0][0]
+            return None
+        
+    def getTaskNotions(task_id):
+        with connect.cursor() as cursor:
+            query = '''With temp as (
+                            SELECT r.task_id as task_id, reminder_id, title, description,
+                                    remind_at
+                                FROM Reminders r JOIN Tasks t ON r.task_id = t.task_id
+                                    and r.task_id=%s and sent = False
+                                order by remind_at)
+                        select json_agg(temp) FROM temp'''
+            cursor.execute(query,[task_id])
+            response = cursor.fetchall()
+            if response and response[0] and response[0][0]:
+                return response[0][0]
+            return None
     
     def getNotActiveNotions(remind_at):
         with connect.cursor() as cursor:
@@ -60,12 +85,12 @@ try:
                 return response[0][0]
             return None
     
-    def updateNotion(notion_id):
+    def updateNotion(notion_id, remind_at):
         with connect.cursor() as cursor:
             query = '''UPDATE Reminders
-                        SET sent = %s
+                        SET remind_at = %s
                         WHERE reminder_id = %s'''
-            cursor.execute(query,[True, notion_id])
+            cursor.execute(query,[remind_at, notion_id])
             return None
 
 

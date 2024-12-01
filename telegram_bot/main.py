@@ -40,7 +40,7 @@ async def main():
         SchedulerMiddleware(scheduler=scheduler),
     )
     from dialogs import start_dialog, create_task, notion_create
-    dp.include_routers(start_dialog, router, create_task, notion_create)
+    dp.include_routers(router, start_dialog, create_task, notion_create)
     setup_dialogs(dp)
     from notions.notions import notion, notion_old
     await notion_old()

@@ -23,7 +23,7 @@ import sys
 
 sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 
-from notion_operations import addNewNotion, delNotion, getActiveNotions # type: ignore
+from notion_operations import addNewNotion, delNotion, getActiveNotions, getTaskNotions, getNotionById, updateNotion # type: ignore
 from tasks_operations import getTasksByUser, getTasksById, delTask, updateTaskDate, updateTaskStatus  # type: ignore
 from tasks_operations import addNewTask, updateTaskTitle, updateTaskDescription  # type: ignore
 from user_operations import addNewUser, getUserByLogin, getUserIdByName, getUserById # type: ignore 
@@ -41,6 +41,8 @@ class MainDialog(StatesGroup):
     start = State()
     task_list = State()
     show_task = State()
+    notion_list = State()
+    show_notion = State()
 
 class TaskCreating(StatesGroup):
     title = State()
@@ -64,12 +66,14 @@ async def go_main(
         dialog_manager: DialogManager):
     await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
 
-async def to_notion(
+async def new_notion(
         callback: CallbackQuery, 
         button: Button,
         dialog_manager: DialogManager):
     task_id = dialog_manager.dialog_data["task_id"]
     await dialog_manager.start(state=NotionCreating.date, data={"task_id": task_id})
+
+
 
 async def create_task(
         callback: CallbackQuery, 
@@ -85,6 +89,15 @@ async def change_task(
     description = dialog_manager.dialog_data["description"] 
     task_id = dialog_manager.dialog_data["task_id"]
     await dialog_manager.start(state=TaskCreating.accept, data={"task_id": task_id, "title": title, "description": description})
+
+async def change_notion(
+        callback: CallbackQuery, 
+        button: Button,
+        dialog_manager: DialogManager):
+    remind_at = dialog_manager.dialog_data["remind_at"]
+    date, time = str(remind_at).split()
+    notion_id = dialog_manager.dialog_data["notion_id"]
+    await dialog_manager.start(state=NotionCreating.accept, data={"notion_id": notion_id, "date": date, "time": time})
 
 
 #=================================Стартеры маин диалога#===============================================================
@@ -103,6 +116,18 @@ async def get_task_list(event_from_user: User, **kwargs):
             titles.append([i["title"],i["task_id"]])
     return {'tasks': resp, "titles": titles}
 
+async def get_notion_list(dialog_manager: DialogManager, **kwargs):
+    #await callback.message.answer(item_id)
+    print(dialog_manager.dialog_data)
+    task_id = dialog_manager.dialog_data["task_id"]
+    title = dialog_manager.dialog_data["title"]
+    resp = getTaskNotions(task_id)
+    titles = []
+    if resp:
+        for i in resp:
+            titles.append([i["remind_at"],i["reminder_id"]])
+    return {'title': title, "titles": titles}
+
 async def get_task(dialog_manager: DialogManager, **kwargs):
     #await callback.message.answer(item_id)
     if "task_id" not in dialog_manager.dialog_data:
@@ -113,7 +138,18 @@ async def get_task(dialog_manager: DialogManager, **kwargs):
     dialog_manager.dialog_data["title"] = resp["title"]
     dialog_manager.dialog_data["description"] = resp["description"]
     dialog_manager.dialog_data["task_id"] = resp["task_id"]
-    return {'task': resp["task_id"], "title": resp["title"], "description": resp["description"]}
+    print(dialog_manager.dialog_data)
+    return {'task_id': resp["task_id"], "title": resp["title"], "description": resp["description"]}
+
+async def get_notion(dialog_manager: DialogManager, **kwargs):
+    #await callback.message.answer(item_id)
+    if "notion_id" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["notion_id"] = dialog_manager.start_data["notion_id"]
+    notion_id = dialog_manager.dialog_data["notion_id"]
+    #print(kwargs)
+    resp = getNotionById(notion_id)[0]
+    dialog_manager.dialog_data["remind_at"] = resp["remind_at"]
+    return {"remind_at": resp["remind_at"]}
 
 #=================================Обработчики маин диалога#============================================================
 
@@ -124,8 +160,23 @@ async def delete_task(callback: CallbackQuery, button: Button, dialog_manager: D
     delTask(task_id)
     await dialog_manager.back()
 
-async def go_next(callback: CallbackQuery, button: Button, dialog_manager: DialogManager, task_id: int):
+async def delete_notion(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
+    #await callback.message.answer(item_id)
+    notion_id = dialog_manager.dialog_data["notion_id"]
+    #print(kwargs)
+    delNotion(notion_id)
+    await dialog_manager.back()
+
+async def go_task(callback: CallbackQuery, button: Button, dialog_manager: DialogManager, task_id: int):
     dialog_manager.dialog_data["task_id"] = task_id
+    await dialog_manager.next()
+
+
+async def to_notion(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
+    await dialog_manager.next()
+
+async def go_notion(callback: CallbackQuery, button: Button, dialog_manager: DialogManager, notion_id: int):
+    dialog_manager.dialog_data["notion_id"] = notion_id
     await dialog_manager.next()
 
 #=================================Стартеры создания таски#=============================================================
@@ -302,13 +353,24 @@ start_dialog = Dialog(
                 id="time_select",
                 items='titles',  # Список задач
                 item_id_getter=lambda x: x[1],  # ID кнопки = текст кнопки
-                on_click=go_next  # Обработчик выбора
+                on_click=go_task  # Обработчик выбора
             ),
             id="task_lists",
             width=1,  # Количество кнопок в строке
             height=5,  # Количество строк
         ),
         Button(Const("Меню📖"), id="task", on_click=go_main),
+        TextInput(
+            id='quick_input',
+            on_success=quick_handler,
+        ),
+        MessageInput(
+            func=no_text,
+            content_types=ContentType.ANY
+        ),
+        state=MainDialog.start,
+        getter=get_name,
+        parse_mode="HTML",
         state=MainDialog.task_list,
         getter=get_task_list,
         parse_mode="HTML",
@@ -318,7 +380,7 @@ start_dialog = Dialog(
         Format(text="{description}", when="description"),
         Group(
             Button(Const("Изменить✏️"), id="chang", on_click=change_task),
-            Button(Const("Напоминание🕘"), id="notion", on_click=to_notion),
+            Button(Const("Напоминания🕘"), id="notion", on_click=to_notion),
             Button(Const("Удалить ❌"), id="task", on_click=delete_task),
             width=3,
         ),
@@ -326,7 +388,44 @@ start_dialog = Dialog(
         state=MainDialog.show_task,
         getter=get_task,
         parse_mode="HTML",
-    )
+    ),
+    Window(                                                                        #--------Окно списка задачь
+        Const(text="<b>Напоминания по задаче\n</b>"),
+        Format("<b>{title}</b>"),
+        ScrollingGroup(
+            Select(
+                text=Format("{item[0]}"),
+                id="time_select",
+                items='titles',  # Список задач
+                item_id_getter=lambda x: x[1],  # ID кнопки = текст кнопки
+                on_click=go_notion  # Обработчик выбора
+            ),
+            id="task_lists",
+            width=1,  # Количество кнопок в строке
+            height=5,  # Количество строк
+        ),
+        Group(
+            SwitchTo(Const("Назад↩️"), id='task_list', state=MainDialog.show_task),
+            Button(Const("Новое🕘"), id="notion", on_click=new_notion),
+            width=3,
+        ),
+        Button(Const("Меню📖"), id="task", on_click=go_main),
+        state=MainDialog.notion_list,
+        getter=get_notion_list,
+        parse_mode="HTML",
+    ),
+    Window(                                                                        #--------Окно просмотра задачи
+        Format(text="<b>{remind_at}</b>"),
+        Group(
+            Button(Const("Изменить✏️"), id="chang", on_click=change_notion),
+            Button(Const("Удалить ❌"), id="task", on_click=delete_notion),
+            width=3,
+        ),
+        SwitchTo(Const("Назад↩️"), id='task_list', state=MainDialog.notion_list),
+        state=MainDialog.show_notion,
+        getter=get_notion,
+        parse_mode="HTML",
+    ),
 )
 
 
@@ -421,11 +520,17 @@ async def get_time(dialog_manager: DialogManager, **kwargs):
 
 async def notion_accept(dialog_manager: DialogManager, **kwargs):
     if "date" not in dialog_manager.dialog_data:
-        dialog_manager.dialog_data["date"] = ''
+        if  dialog_manager.start_data and "date" in dialog_manager.start_data:
+            dialog_manager.dialog_data["date"] = dialog_manager.start_data["date"]
+        else:
+            dialog_manager.dialog_data["date"] = ''
     date = dialog_manager.dialog_data["date"]
 
     if "time" not in dialog_manager.dialog_data:
-        dialog_manager.dialog_data["time"] = ''
+        if  dialog_manager.start_data and "time" in dialog_manager.start_data:
+            dialog_manager.dialog_data["time"] = dialog_manager.start_data["time"]
+        else:
+            dialog_manager.dialog_data["time"] = ''
     time = dialog_manager.dialog_data["time"]
     return {"date": date, "time": time, "nottime":  not time, "notdate": not date}
 
@@ -464,10 +569,15 @@ async def save_notion(callback: CallbackQuery, button: Button, dialog_manager: D
     date = dialog_manager.dialog_data["date"]
     time = dialog_manager.dialog_data["time"]
     result = f'{date} {time}'
-    task_id = dialog_manager.start_data["task_id"]
-    print(task_id, result, callback.message.chat.id)
-    addNewNotion(task_id, result, callback.message.chat.id)
-    print(task_id)
+    if dialog_manager.start_data:
+        if "task_id" in dialog_manager.start_data:
+            task_id = dialog_manager.start_data["task_id"]
+            print(task_id, result, callback.message.chat.id)
+            addNewNotion(task_id, result, callback.message.chat.id)
+            print(task_id)
+        elif "notion_id" in dialog_manager.start_data:
+            notion_id = dialog_manager.start_data["notion_id"]
+            updateNotion(notion_id, result)
     await dialog_manager.done()
 
 time_intervals = [f"{hour:02d}:{minute:02d}" for hour in range(0, 24) for minute in (0, 30)]
