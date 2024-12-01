@@ -24,7 +24,8 @@ import sys
 sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 
 from notion_operations import addNewNotion, delNotion, getActiveNotions # type: ignore
-from tasks_operations import getTasksByUser, getTasksById, delTask, updateTaskDate, updateTaskStatus, addNewTask # type: ignore
+from tasks_operations import getTasksByUser, getTasksById, delTask, updateTaskDate, updateTaskStatus  # type: ignore
+from tasks_operations import addNewTask, updateTaskTitle, updateTaskDescription  # type: ignore
 from user_operations import addNewUser, getUserByLogin, getUserIdByName, getUserById # type: ignore 
 
 env = Env()
@@ -73,9 +74,17 @@ async def to_notion(
 async def create_task(
         callback: CallbackQuery, 
         button: Button,
-        dialog_manager: DialogManager
-):
+        dialog_manager: DialogManager):
     await dialog_manager.start(state=TaskCreating.title)
+
+async def change_task(
+        callback: CallbackQuery, 
+        button: Button,
+        dialog_manager: DialogManager):
+    title = dialog_manager.dialog_data["title"]
+    description = dialog_manager.dialog_data["description"] 
+    task_id = dialog_manager.dialog_data["task_id"]
+    await dialog_manager.start(state=TaskCreating.accept, data={"task_id": task_id, "title": title, "description": description})
 
 
 #=================================Стартеры маин диалога#===============================================================
@@ -96,9 +105,14 @@ async def get_task_list(event_from_user: User, **kwargs):
 
 async def get_task(dialog_manager: DialogManager, **kwargs):
     #await callback.message.answer(item_id)
+    if "task_id" not in dialog_manager.dialog_data:
+        dialog_manager.dialog_data["task_id"] = dialog_manager.start_data["task_id"]
     task_id = dialog_manager.dialog_data["task_id"]
     #print(kwargs)
     resp = getTasksById(task_id)[0]
+    dialog_manager.dialog_data["title"] = resp["title"]
+    dialog_manager.dialog_data["description"] = resp["description"]
+    dialog_manager.dialog_data["task_id"] = resp["task_id"]
     return {'task': resp["task_id"], "title": resp["title"], "description": resp["description"]}
 
 #=================================Обработчики маин диалога#============================================================
@@ -148,7 +162,10 @@ async def start_accept(dialog_manager: DialogManager, **kwargs):
     title = dialog_manager.dialog_data["title"]
     print(title)
     if "description" not in dialog_manager.dialog_data:
-        dialog_manager.dialog_data["description"] = ''
+        if "description" in dialog_manager.start_data:
+            dialog_manager.dialog_data["description"] = dialog_manager.start_data["description"]
+        else:
+            dialog_manager.dialog_data["description"] = ''
     description = dialog_manager.dialog_data["description"]
     return {"title": title, "description": description}
 
@@ -162,9 +179,14 @@ async def save_task(callback: CallbackQuery, button: Button, dialog_manager: Dia
     title = dialog_manager.dialog_data["title"]
     description = dialog_manager.dialog_data["description"]
     print(title, description)
-    task_id = addNewTask(user_id=user_id, title=title, description=description)
+    if "task_id" in dialog_manager.start_data:
+        task_id = dialog_manager.start_data["task_id"]
+        updateTaskTitle(task_id, title)
+        updateTaskDescription(task_id, description)
+    else:
+        task_id = addNewTask(user_id=user_id, title=title, description=description)
     print(task_id)
-    await dialog_manager.done()
+    await dialog_manager.start(state=MainDialog.show_task, data={"task_id": task_id})
 
 #=================================Проверка юзер вавода для тасок#=======================================================
 
@@ -230,10 +252,10 @@ async def no_text(message: Message, widget: MessageInput, dialog_manager: Dialog
 start_dialog = Dialog(
     Window(                                                                        #--------Основное окно
         Format(text="Привет {user_name}😉"),
-        Const(text="\n\nДля быстрого создания, сразу введите заголовок"),
+        Const(text="\n\nДля быстрого создания, можно сразу ввести заголовок"),
         Group(
-            SwitchTo(Const("Список задач"), id='task_list', state=MainDialog.task_list),
-            Button(Const("Создать задачу"), id="crawl", on_click=create_task),
+            SwitchTo(Const("Список задач📋"), id='task_list', state=MainDialog.task_list),
+            Button(Const("Создать задачу✏️"), id="crawl", on_click=create_task),
         ),
         TextInput(
             id='quick_input',
@@ -260,7 +282,7 @@ start_dialog = Dialog(
             width=1,  # Количество кнопок в строке
             height=5,  # Количество строк
         ),
-        Button(Const("Меню"), id="task", on_click=go_main),
+        Button(Const("Меню📖"), id="task", on_click=go_main),
         state=MainDialog.task_list,
         getter=get_task_list
     ),
@@ -268,11 +290,12 @@ start_dialog = Dialog(
         Format(text="{title}"),
         Format(text="{description}", when="description"),
         Group(
+            Button(Const("Изменить✏️"), id="chang", on_click=change_task),
+            Button(Const("Напоминание🕘"), id="notion", on_click=to_notion),
             Button(Const("Удалить ❌"), id="task", on_click=delete_task),
-            Button(Const("Создать уведомление"), id="notion", on_click=to_notion),
-            SwitchTo(Const("Назад"), id='task_list', state=MainDialog.task_list),
-            width=2,
+            width=3,
         ),
+        SwitchTo(Const("Назад↩️"), id='task_list', state=MainDialog.task_list),
         state=MainDialog.show_task,
         getter=get_task
     )
@@ -285,7 +308,7 @@ create_task = Dialog(
     Window(                                                                        #--------Ввод заголовка
         Format(text="Название: {title}", when="title"),
         Format(text="Описание: {description}", when="description"),
-        Const(text="Введи название задачи:"),
+        Const(text="Введите название:"),
         Group(
             SwitchTo(Const("Готово ✅"), id='task_list', state=TaskCreating.accept, when="title"),
             SwitchTo(Const("Ввести описание"), id='task_list', state=TaskCreating.description, when="title"),
@@ -308,7 +331,7 @@ create_task = Dialog(
     Window(                                                                        #--------Ввод описания
         Format(text="Название: {title}"),
         Format(text="Описание: {description}", when="description"),
-        Const(text="Введи описание задачи:"),
+        Const(text="Введи описание:"),
         Group(
             SwitchTo(Const("Готово ✅"), id='task_accept', state=TaskCreating.accept),
             SwitchTo(Const("Изменить название"), id='task_desc', state=TaskCreating.title),
@@ -333,10 +356,10 @@ create_task = Dialog(
         Format(text="Название: {title}"),
         Format(text="Описание: {description}", when="description"),
         Group(
-            Button(Const("Сохранить задачу"), id='task_save', on_click=save_task),
-            SwitchTo(Const("Изменить название"), id='title', state=TaskCreating.title),
-            SwitchTo(Const("Изменить описание"), id='task_desc', state=TaskCreating.description),
-            Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
+            SwitchTo(Const("Изменить название✏️"), id='title', state=TaskCreating.title),
+            SwitchTo(Const("Изменить описание✏️"), id='task_desc', state=TaskCreating.description),
+            Button(Const("Сохранить✅"), id='task_save', on_click=save_task),
+            Button(Const("Отмена❌"), id="cancel", on_click=go_main),
             width=2,
         ),
         state=TaskCreating.accept,
@@ -463,10 +486,10 @@ notion_create = Dialog(
     Window(                                                                        #--------Подтверждение создания
         Multi(Format(text="Выбрана дата: {date}", when="date"), Format(text="время: {time}", when="time"), sep =" "),
         Group(
-            Button(Const("Сохранить уведомление"), id='task_save', on_click=save_notion),
-            SwitchTo(Const("Изменить дату"), id='title', state=NotionCreating.date),
-            SwitchTo(Const("Изменить время"), id='task_desc', state=NotionCreating.time),
-            Button(Const("Отмена ❌"), id="cancel", on_click=go_main),
+            SwitchTo(Const("Изменить дату📆"), id='title', state=NotionCreating.date),
+            SwitchTo(Const("Изменить время🕘"), id='task_desc', state=NotionCreating.time),
+            Button(Const("Сохранить✅"), id='task_save', on_click=save_notion),
+            Button(Const("Отмена❌"), id="cancel", on_click=go_main),
             width=2,
         ),
         state=NotionCreating.accept,
@@ -480,8 +503,8 @@ notion = Dialog(
         Format(text="Название: {title}"),
         Format(text="Описание: {description}", when="description"),
         Group(
-            Cancel(Const("Назад")),
-            Button(Const("Меню"), id="cancel", on_click=go_main),
+            Cancel(Const("Назад↩️")),
+            Button(Const("Меню📖"), id="cancel", on_click=go_main),
             width=2,
         ),
         state=SendNotion.start,
