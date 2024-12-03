@@ -5,8 +5,9 @@ from aiogram.filters import CommandStart, Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message, User, ContentType
 from aiogram_dialog import Dialog, DialogManager, StartMode, Window, setup_dialogs
-from aiogram_dialog.widgets.kbd import Button, Row, Column, SwitchTo
+from aiogram_dialog.widgets.kbd import Button, Row, Column, SwitchTo, ScrollingGroup, Counter, ManagedCounter, Cancel, Next, Back
 from aiogram_dialog.widgets.text import Const, Format, Case, List
+from aiogram_dialog.widgets.input import TextInput, ManagedTextInput
 import bot_config
 import logging
 import text
@@ -23,11 +24,12 @@ router = Router()
 
 
 class MainDialog(StatesGroup):
-	start = State()
-	all_welcome = State()
 	donate = State()
 	donate_rubs = State()
+	donate_rubs_accept = State()
 	donate_stars = State()
+	donate_stars_accept = State()
+	congrats_4_donate = State()
 	
 
 
@@ -62,23 +64,42 @@ async def donate_window (callback: CallbackQuery, widget: Button, dialog_manager
 
 
 
-# Это классический хэндлер, который будет срабатывать на команду /start
-@router.message(Command("start"))
-async def command_start_process(message: Message, dialog_manager: DialogManager):
-    await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
 
 
-PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = 10 * 100) #копейки
+
+
+
+
+
+
+
+
+
+
+
 async def donate_rubs_done (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
-	message = callback.message
+	PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = int(dialog_manager.dialog_data['value']) * 100) #копейки
+	#message = callback.message
 	#if bot_config.test_pay_token.split(':')[1] == 'TEST':
 	#	await bot.send_message(message.chat.id, "Попробуем оплатить")
-    
-	await bot.send_invoice(message.chat.id,
-                           title="Подписка на бота",
-                           description="Активация подписки на бота на 1 месяц",
+	await bot.send_invoice(dialog_manager.event.message.chat.id,
+                           title="Добровольно пожертвование",
+                           description="Разовое добровольное пожертвование \nна поддержку развития проекта",
                            provider_token=bot_config.test_pay_token,
                            currency="rub",
+                           is_flexible=False,
+                           prices=[PRICE],
+                           start_parameter="one-month-subscription",
+                           payload="test-invoice-payload")
+
+async def donate_stars_done (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
+	PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = int(dialog_manager.dialog_data['value'])) 
+	message = callback.message 
+	await bot.send_invoice(message.chat.id,
+                           title="Добровольно пожертвование",
+                           description="Разовое добровольное пожертвование \nна поддержку развития проекта",
+                           provider_token=bot_config.test_pay_token,
+                           currency="XTR",
                            is_flexible=False,
                            prices=[PRICE],
                            start_parameter="one-month-subscription",
@@ -89,18 +110,13 @@ async def donate_rubs_done (callback: CallbackQuery, widget: Button, dialog_mana
 async def pre_checkout (pre_checkout_q: types.PreCheckoutQuery):
 	await bot.answer_pre_checkout_query (pre_checkout_q.id, ok=True)
 
-
 # обработка успешного платежа
 @router.message (F.content_type == ContentType.SUCCESSFUL_PAYMENT)
 async def succesful_payment (message: types.Message, dialog_manager: DialogManager):
-	print ("Succesful payment:")
-	payment_info = message.successful_payment
-	#await message.reply (payment_info.model_dump_json(indent=4, exclude_none=True))
-	await bot.send_message (message.chat.id, 
-						f"Платеж на сумму {message.successful_payment.total_amount // 100} {message.successful_payment.currency} прошел успешно!!!")
-	await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
+	await dialog_manager.start(state=MainDialog.congrats_4_donate, mode=StartMode.RESET_STACK)
 
 	
+
 
 
 
@@ -114,60 +130,47 @@ async def succesful_payment (message: types.Message, dialog_manager: DialogManag
 async def get_username (event_from_user: User, **kwargs):
 	return {'username': event_from_user.username}
 
-async def welcome_getter (event_from_user: User, **kwargs):
-	return {'username': event_from_user.username, 'number': random.randint(1, 5)}
+async def get_value (dialog_manager: DialogManager, **kwargs):
+	#print (dialog_manager.event.model_dump_json(indent=3, exclude_none=True))
+	resp = dialog_manager.event.text
+	dialog_manager.dialog_data['value'] = resp
+	return {'value': resp}
 
-async def get_welcome_words (event_from_user: User, **kwargs):
-	username = event_from_user.username
-	return {'items': (
-		(1, text.random_welcome_1.format(username = username)),
-		(2, text.random_welcome_2.format(username = username)),
-		(3, text.random_welcome_3.format(username = username)),
-		(4, text.random_welcome_4.format(username = username)),
-		(5, text.random_welcome_5.format(username = username)),
-	)}
+def sum_check (text: str) -> str:
+	if all(ch.isdigit() for ch in text) and 0 <= int(text) <= 1000000:
+		return text
+	raise ValueError
 
-
-
+async def incorrect_sum (message: Message, widget: ManagedTextInput, dialo_manager: DialogManager, text: str):
+	await message.answer ('Некорректное значение, поробуйте еще раз')
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Это классический хэндлер, который будет срабатывать на команду /start
+@router.message(Command("start"))
+async def command_start_process(message: Message, dialog_manager: DialogManager):
+    await dialog_manager.start(state=MainDialog.donate, mode=StartMode.RESET_STACK)
 
 start_dialog = Dialog(
-	# Стартовое окно
-	Window (
-		Case (
-			texts={
-				1: Format (text=text.random_welcome_1),
-				2: Format (text=text.random_welcome_2),
-				3: Format (text=text.random_welcome_3),
-				4: Format (text=text.random_welcome_4),
-				5: Format (text=text.random_welcome_5),
-			},
-			selector='number',
-		),
-		Column (
-			Button (text=Const(text.main_window_my_info), id = text.main_window_my_info_id),
-			Button (text=Const(text.main_window_my_tasks), id = text.main_window_my_tasks_id),
-			Button (text=Const(text.main_window_new_tasks), id = text.main_window_new_tasks_id),
-			Button (text=Const(text.main_window_donate), id = text.main_window_donate_id, on_click = donate_window),
-			Button (text=Const('Показать список приветствий'), id = 'welcome_list', on_click=show_all_welcome),
-		),
-		getter=welcome_getter,
-		state=MainDialog.start,
-	),
-	# Окно списка приветствий
-	Window (
-		Format (text='Список приветствий'),
-		List (
-			field=Format('{item[0]}.  {item[1]}'),
-			items = 'items'),
-		SwitchTo (Const('back'), id='back', state=MainDialog.start),
-		getter = get_welcome_words,
-		state = MainDialog.all_welcome,
-	),
+
 	# Окно выбора варианта доната
 	Window (
 		Format (text=text.donate_word),
@@ -175,32 +178,81 @@ start_dialog = Dialog(
 			SwitchTo (Const(text.donate_stars), id = text.donate_stars_id, state = MainDialog.donate_stars),
 			SwitchTo (Const(text.donate_rubs), id = text.donate_rubs_id, state = MainDialog.donate_rubs),
 		),
-		SwitchTo (Const('back'), id='back', state=MainDialog.start),
 		getter=get_username,
 		state = MainDialog.donate,
+		parse_mode="HTML",
 	),
+
+
 	# Окно диалога доната рублями
 	Window (
 		Format (text.welcome_donate_rubs),
+		Const (text.enter_donate_value),
+		TextInput (
+			id = 'donate_rubs',
+			type_factory = sum_check,
+			on_success = Next(),
+			on_error = incorrect_sum,
+		),
 		SwitchTo (Const('back'), id='back', state=MainDialog.donate),
 		getter=get_username,
-		state = MainDialog.donate_rubs
+		state = MainDialog.donate_rubs,
+		parse_mode="HTML",
 	),
-	# Окно диалога доната звездами
+
+	
+	# Подтверждение доната рублями
+	Window (
+		Const ('Подтверждение оплаты рубликами'),
+		Format ('Сумма - {value} рублей'),
+		Row (
+			Button (Const(text.accept), id = text.accept_id, on_click = donate_rubs_done),
+			Button (Const(text.cancel), id = text.cancel_id, on_click = Back())
+		),
+		getter = get_value,
+		state = MainDialog.donate_rubs_accept,
+		parse_mode="HTML",
+	),
+
+
+	# Окно доната звездами
 	Window (
 		Format (text.welcome_donate_stars),
+		Const (text.enter_donate_value),
+		TextInput (
+			id = 'donate_stars',
+			type_factory = sum_check,
+			on_success = Next(),
+			on_error = incorrect_sum,
+		),
 		SwitchTo (Const('back'), id='back', state=MainDialog.donate),
 		getter=get_username,
-		state = MainDialog.donate_stars
+		state = MainDialog.donate_stars,
+		parse_mode="HTML",
 	),
+
+	# Подтверждение оплаты звездами
+		Window (
+		Const ('Подтверждение оплаты звёздочками'),
+		Format ('Сумма - {value} звёзд'),
+		Row (
+			Button (Const(text.accept), id = text.accept_id, on_click = donate_stars_done),
+			Button (Const(text.cancel), id = text.cancel_id, on_click = Back())
+		),
+		getter = get_value,
+		state = MainDialog.donate_stars_accept,
+		parse_mode="HTML",
+	),
+
+	# Окно благодарности
+	Window (
+		Format (text.congrats_4_donate),
+		SwitchTo (Const('Главное меню'), id='back', state=MainDialog.donate),
+		getter = get_username,
+		state = MainDialog.congrats_4_donate,
+		parse_mode = "HTML",
+	)
 )
-
-
-#@dp.message.register (succesful_payment, F.content_type == ContentType.SUCCESSFUL_PAYMENT)
-
-
-def test():
-	return 0
 
 if __name__ == '__main__':
 	logging.basicConfig(level=logging.INFO)
