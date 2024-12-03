@@ -1,17 +1,14 @@
 from aiogram import Bot, Dispatcher, Router, types, F
-from aiogram.client.default import DefaultBotProperties
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart, Command
+from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message, User, ContentType
 from aiogram_dialog import Dialog, DialogManager, StartMode, Window, setup_dialogs
-from aiogram_dialog.widgets.kbd import Button, Row, Column, SwitchTo, ScrollingGroup, Counter, ManagedCounter, Cancel, Next, Back
-from aiogram_dialog.widgets.text import Const, Format, Case, List
+from aiogram_dialog.widgets.kbd import Button, Row, Column, SwitchTo, Next, Back
+from aiogram_dialog.widgets.text import Const, Format
 from aiogram_dialog.widgets.input import TextInput, ManagedTextInput
 import bot_config
 import logging
 import text
-import random
 
 
 
