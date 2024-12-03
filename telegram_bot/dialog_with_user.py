@@ -204,7 +204,7 @@ start_dialog = Dialog(
 	# Подтверждение доната рублями
 	Window (
 		Const ('Подтверждение оплаты рубликами'),
-		Format ('Сумма - {value} рублей'),
+		Format ('Сумма в рублях - {value}'),
 		Row (
 			Button (Const(text.accept), id = text.accept_id, on_click = donate_rubs_done),
 			Button (Const(text.cancel), id = text.cancel_id, on_click = Back())
@@ -234,7 +234,7 @@ start_dialog = Dialog(
 	# Подтверждение оплаты звездами
 		Window (
 		Const ('Подтверждение оплаты звёздочками'),
-		Format ('Сумма - {value} звёзд'),
+		Format ('Сумма в звездах - {value}'),
 		Row (
 			Button (Const(text.accept), id = text.accept_id, on_click = donate_stars_done),
 			Button (Const(text.cancel), id = text.cancel_id, on_click = Back())
