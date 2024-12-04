@@ -14,6 +14,7 @@ from aiogram import Bot, types, F, Router
 from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
+import bot_config
 
 
 
@@ -29,7 +30,7 @@ class SchedulerMiddleware(BaseMiddleware):
         return await handler(event, data)
 
 # Удалено чтение токена из файла, пока хз почему не работает
-API_TOKEN = '8046199610:AAGaVMYvVtXxs7rtg2JLEMdTD3H2as74Tow'
+API_TOKEN = bot_config.main_bot_token
 bot = Bot(token=API_TOKEN)
 
 

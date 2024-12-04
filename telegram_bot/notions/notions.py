@@ -5,7 +5,6 @@ from battons.button_builder import but_builder
 from datetime import date, datetime
 from battons.button_builder import but_builder
 
-from logic.task import taskCreating, taskShows, showTask # type: ignore
 sys.path.insert (1, os.path.join (sys.path[0], "../DataBase"))
 
 
@@ -28,14 +27,14 @@ async def send_notion(chat_id, task_id):
     task = getTasksById(task_id)[0]
     if task['description']:
         await bt.send_message(chat_id=chat_id,text=
-                            f'🔔УВЕДОМЛЕНИЕ🔔\n{task['title']}\nОписание: {task['description']}' +\
-                            "\n\n Чтобы вернутся в меню нажмите /start" + \
-                                "\nИли продожите деалог")
+                            f'🔔УВЕДОМЛЕНИЕ🔔\n{task["title"]}\nОписание: {task["description"]}' +\
+                            '\n\n Чтобы вернутся в меню нажмите /start' + \
+                                '\nИли продожите деалог')
     else:
         await bt.send_message(chat_id=chat_id,text=\
-                              f'🔔УВЕДОМЛЕНИЕ🔔\n {task['title']}' +\
-                            "\n\n Чтобы вернутся в меню нажмите /start" + \
-                                "\nИли продожите деалог")
+                              f'🔔УВЕДОМЛЕНИЕ🔔\n {task["title"]}' +\
+                            '\n\n Чтобы вернутся в меню нажмите /start' + \
+                                '\nИли продожите деалог')
 
 
 
