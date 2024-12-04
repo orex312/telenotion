@@ -22,13 +22,21 @@ try:
 
 #---------------------------------------------------------------
 
-# Удалить напоминалку             
-    def delNotion(task_id):
+# Удалить напоминалку    
+
+    def delNotion(reminder_id):
+        with connect.cursor() as cursor:
+            query = '''DELETE FROM Reminders
+                        WHERE reminder_id = %s'''
+            cursor.execute(query,[reminder_id])
+            return 0   
+
+    def notionIsSend(reminder_id):
         with connect.cursor() as cursor:
             query = '''UPDATE Reminders
                         SET sent = True
-                        WHERE task_id = %s'''
-            cursor.execute(query,[task_id])
+                        WHERE reminder_id = %s'''
+            cursor.execute(query,[reminder_id])
             return 0
     
 #-----------------------Получение напоминалок-------------------------
@@ -37,7 +45,7 @@ try:
     def getActiveNotions(remind_at):
         with connect.cursor() as cursor:
             query = '''With temp as (
-                            SELECT r.task_id as task_id, r.chat_id as chat_id, reminder_id
+                            SELECT r.task_id as task_id, r.chat_id as chat_id, reminder_id, remind_at
                                 FROM Reminders r JOIN Tasks t ON r.task_id = t.task_id
                                     and remind_at = %s and sent = False)
                         select json_agg(temp) FROM temp'''
@@ -75,7 +83,7 @@ try:
     def getNotActiveNotions(remind_at):
         with connect.cursor() as cursor:
             query = '''With temp as (
-                            SELECT r.task_id as task_id, r.chat_id as chat_id, reminder_id
+                            SELECT r.task_id as task_id, r.chat_id as chat_id, reminder_id, remind_at
                                 FROM Reminders r JOIN Tasks t ON r.task_id = t.task_id
                                     and remind_at <= %s and sent = False)
                         select json_agg(temp) FROM temp'''

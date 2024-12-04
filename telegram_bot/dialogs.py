@@ -346,7 +346,8 @@ start_dialog = Dialog(
         parse_mode="HTML",
     ),
     Window(                                                                        #--------Окно списка задачь
-        Const(text="<b>Список задач</b>"),
+        Const(text="<b>Список задач 📋</b>"),
+        Const(text="\n\n<i>Для быстрого создания, можно сразу ввести заголовок</i>"),
         ScrollingGroup(
             Select(
                 text=Format("{item[0]}"),
@@ -368,9 +369,6 @@ start_dialog = Dialog(
             func=no_text,
             content_types=ContentType.ANY
         ),
-        state=MainDialog.start,
-        getter=get_name,
-        parse_mode="HTML",
         state=MainDialog.task_list,
         getter=get_task_list,
         parse_mode="HTML",
