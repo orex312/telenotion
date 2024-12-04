@@ -39,16 +39,10 @@ async def donate_rubs(callback: CallbackQuery, widget: Button, dialog_manager: D
 	await callback.message.edit_text(text='Донат рублями 💵 по карточке')
 	await dialog_manager.done()  
 
-
 # обработка доната звездами
 async def donate_stars (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
 	await callback.message.edit_text (text='Донат звездами ⭐️ телеграм')
 	await dialog_manager.done()
-
-
-async def show_all_welcome (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
-	await dialog_manager.start(MainDialog.all_welcome)
-
 
 async def donate_window (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
 	await dialog_manager.start (MainDialog.donate)
@@ -66,16 +60,8 @@ async def donate_window (callback: CallbackQuery, widget: Button, dialog_manager
 
 
 
-
-
-
-
-
-
-
-
 async def donate_rubs_done (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
-	PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = int(dialog_manager.dialog_data['value']) * 100) #копейки
+	PRICE = types.LabeledPrice (label = "Добровольное пожертвование", amount = int(dialog_manager.dialog_data['value']) * 100) #копейки
 	#message = callback.message
 	#if bot_config.test_pay_token.split(':')[1] == 'TEST':
 	#	await bot.send_message(message.chat.id, "Попробуем оплатить")
@@ -90,7 +76,7 @@ async def donate_rubs_done (callback: CallbackQuery, widget: Button, dialog_mana
                            payload="test-invoice-payload")
 
 async def donate_stars_done (callback: CallbackQuery, widget: Button, dialog_manager: DialogManager):
-	PRICE = types.LabeledPrice (label = "Подписка на месяц", amount = int(dialog_manager.dialog_data['value'])) 
+	PRICE = types.LabeledPrice (label = "Добровольное пожертвование", amount = int(dialog_manager.dialog_data['value'])) 
 	message = callback.message 
 	await bot.send_invoice(message.chat.id,
                            title="Добровольно пожертвование",
@@ -103,7 +89,7 @@ async def donate_stars_done (callback: CallbackQuery, widget: Button, dialog_man
                            payload="test-invoice-payload")
 
 # обработка и утверждение платежа перед тем, как пользователь его совершит
-@dp.pre_checkout_query (lambda query: True)
+@router.pre_checkout_query (lambda query: True)
 async def pre_checkout (pre_checkout_q: types.PreCheckoutQuery):
 	await bot.answer_pre_checkout_query (pre_checkout_q.id, ok=True)
 
@@ -128,7 +114,7 @@ async def get_username (event_from_user: User, **kwargs):
 	return {'username': event_from_user.username}
 
 async def get_value (dialog_manager: DialogManager, **kwargs):
-	#print (dialog_manager.event.model_dump_json(indent=3, exclude_none=True))
+	print (dialog_manager.event.model_dump_json(indent=3, exclude_none=True))
 	resp = dialog_manager.event.text
 	dialog_manager.dialog_data['value'] = resp
 	return {'value': resp}
@@ -140,16 +126,6 @@ def sum_check (text: str) -> str:
 
 async def incorrect_sum (message: Message, widget: ManagedTextInput, dialo_manager: DialogManager, text: str):
 	await message.answer ('Некорректное значение, поробуйте еще раз')
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -197,7 +173,6 @@ start_dialog = Dialog(
 		parse_mode="HTML",
 	),
 
-	
 	# Подтверждение доната рублями
 	Window (
 		Const ('Подтверждение оплаты рубликами'),
@@ -210,7 +185,6 @@ start_dialog = Dialog(
 		state = MainDialog.donate_rubs_accept,
 		parse_mode="HTML",
 	),
-
 
 	# Окно доната звездами
 	Window (
