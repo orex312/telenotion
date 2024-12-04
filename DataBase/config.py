@@ -1,5 +1,4 @@
 host = "127.0.0.1"
-user = "postgres"
+user = "testuser"
 password = "likemeup312"
 db_name = "postgres"
-db_name = "test"
