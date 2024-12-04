@@ -134,7 +134,7 @@ async def get_value (dialog_manager: DialogManager, **kwargs):
 	return {'value': resp}
 
 def sum_check (text: str) -> str:
-	if all(ch.isdigit() for ch in text) and 0 <= int(text) <= 1000000:
+	if all(ch.isdigit() for ch in text) and 1 <= int(text) <= 1000000:
 		return text
 	raise ValueError
 
