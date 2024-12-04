@@ -149,7 +149,7 @@ donate_dialog = Dialog(
 		Format (text=text.donate_word),
 		Column (
 			SwitchTo (Const(text.donate_stars), id = text.donate_stars_id, state = DonateDialog.donate_stars),
-			SwitchTo (Const(text.donate_rubs + " тестовая")), id = text.donate_rubs_id, state = DonateDialog.donate_rubs),
+			SwitchTo (Const(text.donate_rubs + " тестовая"), id = text.donate_rubs_id, state = DonateDialog.donate_rubs),
 		),
 		Button(Const("Меню📖"), id="task", on_click=go_main),
 		getter=get_username,
@@ -157,8 +157,6 @@ donate_dialog = Dialog(
 		parse_mode="HTML",
 	),
 
-
-	# Окно диалога доната рублями
 	Window (
 		Format (text.welcome_donate_rubs),
 		Const (text.enter_donate_value),
@@ -209,7 +207,7 @@ donate_dialog = Dialog(
 	),
 
 	# Подтверждение оплаты звездами
-		Window (
+	Window (
 		Const ('Подтверждение оплаты звёздочками'),
 		Format ('Сумма в звездах - {value}'),
 		Row (
