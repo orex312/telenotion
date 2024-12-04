@@ -57,6 +57,10 @@ class NotionCreating(StatesGroup):
 class SendNotion(StatesGroup):
     start = State()
 
+
+
+    
+
 #=================================Переходы между диалогами#===========================================================
 
 
@@ -65,6 +69,13 @@ async def go_main(
         button: Button,
         dialog_manager: DialogManager):
     await dialog_manager.start(state=MainDialog.start, mode=StartMode.RESET_STACK)
+
+async def go_donat(
+        callback: CallbackQuery, 
+        button: Button,
+        dialog_manager: DialogManager):
+    from dialog_with_user import DonateDialog
+    await dialog_manager.start(state=DonateDialog.donate)
 
 async def new_notion(
         callback: CallbackQuery, 
@@ -90,10 +101,8 @@ async def change_task(
     task_id = dialog_manager.dialog_data["task_id"]
     await dialog_manager.start(state=TaskCreating.accept, data={"task_id": task_id, "title": title, "description": description})
 
-async def change_notion(
-        callback: CallbackQuery, 
-        button: Button,
-        dialog_manager: DialogManager):
+
+async def change_notion(callback: CallbackQuery, button: Button, dialog_manager: DialogManager):
     remind_at = dialog_manager.dialog_data["remind_at"]
     date, time = str(remind_at).split()
     notion_id = dialog_manager.dialog_data["notion_id"]
@@ -332,6 +341,7 @@ start_dialog = Dialog(
         Group(
             SwitchTo(Const("Список задач📋"), id='task_list', state=MainDialog.task_list),
             Button(Const("Создать задачу✏️"), id="crawl", on_click=create_task),
+            Button(Const("Донат 🤑"), id="donate", on_click=go_donat),
         ),
         TextInput(
             id='quick_input',

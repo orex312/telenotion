@@ -15,7 +15,8 @@ from aiogram.types import Message
 from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 
-from dialogs import router
+
+
 
 class SchedulerMiddleware(BaseMiddleware):
     def __init__(self, scheduler: AsyncIOScheduler):
@@ -28,7 +29,7 @@ class SchedulerMiddleware(BaseMiddleware):
         return await handler(event, data)
 
 # Удалено чтение токена из файла, пока хз почему не работает
-API_TOKEN = '7744140930:AAEtaKzDfFEls5-dc6KPMNui7Mzfv0zasiM'
+API_TOKEN = '8046199610:AAGaVMYvVtXxs7rtg2JLEMdTD3H2as74Tow'
 bot = Bot(token=API_TOKEN)
 
 
@@ -39,8 +40,9 @@ async def main():
     dp.update.middleware(
         SchedulerMiddleware(scheduler=scheduler),
     )
-    from dialogs import start_dialog, create_task, notion_create
-    dp.include_routers(router, start_dialog, create_task, notion_create)
+    from dialogs import router, start_dialog, create_task, notion_create
+    from dialog_with_user import donate_dialog
+    dp.include_routers(router, start_dialog, create_task, notion_create, donate_dialog)
     setup_dialogs(dp)
     from notions.notions import notion, notion_old
     await notion_old()
