@@ -5,7 +5,7 @@ from user_operations import *
 connect = Connection().connect
 try:
     # Создание новой таски
-    def addNewTask(user_id, title, descryption = '', due_date = None, status = "open", priority = 1, parent_id = None):
+    def addNewTask(user_id, title, description = '', due_date = None, status = "open", priority = 1, parent_id = None):
         with connect.cursor() as cursor:
             query = '''select max(task_id) from tasks'''
             cursor.execute(query)
@@ -17,7 +17,7 @@ try:
                 task_id += 1
             query = '''INSERT INTO Tasks (task_id, user_id, title, description, due_date, status, priority, creatad_at, parent_id)
                         VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
-            cursor.execute(query, [task_id, user_id, title, descryption, due_date, status, priority,\
+            cursor.execute(query, [task_id, user_id, title, description, due_date, status, priority,\
                                    datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M:%S'), parent_id])
             return task_id
 
@@ -38,13 +38,13 @@ try:
         with connect.cursor() as cursor:
             query = '''with temp as(
                             SELECT * FROM Tasks
-                                WHERE user_id = 10
+                                WHERE user_id = %s
                                 AND parent_id is null
                                 order by creatad_at desc)
                         select jsonb_agg(temp) from temp '''
             cursor.execute(query,[user_id])
-            response = cursor.fetchall()
-            return response[0][0]
+            response = cursor.fetchone()
+            return response[0]
 
 # Получить сабтаску       
     def getSubTasks(task_id):
